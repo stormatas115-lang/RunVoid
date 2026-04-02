@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-85G1JY4Q01"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-85G1JY4Q01');
+</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Void Run — The Void Doesn't Wait</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/voidbot.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyCD0gVXr7dDnKuIpqXjVet2vvI09ryPGvU",
+  authDomain:"voidruninc.firebaseapp.com",
+  projectId:"voidruninc",
+  appId:"1:832807736710:web:fdfba2332c3aa274fc8807"
+});
+</script>
+  <style>
+    :root {
+      --green: #00ff46;
+      --green-dim: #00cc38;
+      --green-glow: rgba(0,255,70,0.18);
+      --bg: #05080a;
+      --card: rgba(0,255,70,0.04);
+      --border: rgba(0,255,70,0.12);
+      --text: #c8d8c8;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-ui: 'Barlow Condensed', sans-serif;
+      --font-body: 'Barlow', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-body); overflow-x: hidden; cursor: none; }
+    .cursor { width: 10px; height: 10px; background: var(--green); border-radius: 50%; position: fixed; pointer-events: none; z-index: 999999; transform: translate(-50%,-50%); transition: transform 0.08s ease, width 0.2s, height 0.2s, opacity 0.2s; box-shadow: 0 0 12px var(--green), 0 0 30px rgba(0,255,70,0.3); left: -100px; top: -100px; }
+    .cursor-ring { width: 32px; height: 32px; border: 1px solid rgba(0,255,70,0.5); border-radius: 50%; position: fixed; pointer-events: none; z-index: 999998; transform: translate(-50%,-50%); transition: left 0.12s ease, top 0.12s ease, width 0.2s, height 0.2s; left: -100px; top: -100px; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px); pointer-events: none; z-index: 100; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; display: flex; align-items: center; justify-content: space-between; padding: 0 4rem; height: 64px; background: rgba(5,8,10,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+    .nav-logo { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.12em; color: #fff; }
+    .nav-logo span { color: var(--green); }
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a { font-family: var(--font-ui); font-size: 1rem; font-weight: 600; letter-spacing: 0.1em; color: rgba(255,255,255,0.55); text-decoration: none; text-transform: uppercase; transition: color 0.2s; cursor: pointer; }
+    .nav-links a:hover { color: var(--green); }
+    #navUser { display: none; align-items: center; gap: 10px; }
+    #navUser.show { display: flex; }
+    #navUsername { font-family: var(--font-ui); font-size: 0.95rem; font-weight: 600; color: var(--green); letter-spacing: 0.05em; }
+    #navLogout { background: transparent; border: 1px solid var(--border); color: rgba(255,255,255,0.45); font-family: var(--font-ui); font-size: 0.85rem; letter-spacing: 0.08em; padding: 5px 12px; border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: border-color 0.2s, color 0.2s; }
+    #navLogout:hover { border-color: var(--green); color: var(--green); }
+    .settings-btn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 16px; border: 1px solid var(--green); border-radius: 4px; color: var(--green) !important; text-decoration: none; font-family: var(--font-ui) !important; font-size: 0.9rem !important; font-weight: 700 !important; letter-spacing: 0.12em !important; text-transform: uppercase; background: transparent; cursor: pointer; transition: all 0.25s ease; position: relative; overflow: hidden; box-shadow: 0 0 12px rgba(0,255,70,0.15); }
+    .settings-btn::before { content: ''; position: absolute; inset: 0; background: var(--green); transform: translateX(-100%); transition: transform 0.25s ease; z-index: 0; }
+    .settings-btn:hover::before { transform: translateX(0); }
+    .settings-btn:hover { color: #000 !important; box-shadow: 0 0 24px rgba(0,255,70,0.6), 0 0 48px rgba(0,255,70,0.2) !important; }
+    .settings-btn .s-icon, .settings-btn .s-text { position: relative; z-index: 1; }
+    .settings-btn .s-icon { font-size: 13px; transition: transform 0.4s ease; display: inline-block; }
+    .settings-btn:hover .s-icon { transform: rotate(90deg); }
+
+    /* ── VOID TRIALS NAV */
+    .vt-nav-link { position: relative !important; }
+    .vt-nav-link:hover { color: var(--green) !important; }
+    @keyframes pulseBadge {
+      0%, 100% { box-shadow: 0 0 6px rgba(0,255,70,0.8); }
+      50%       { box-shadow: 0 0 18px rgba(0,255,70,1), 0 0 32px rgba(0,255,70,0.5); }
+    }
+    .vt-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,255,70,0.12); color: var(--green);
+      border: 1px solid rgba(0,255,70,0.5);
+      font-family: 'Barlow Condensed', sans-serif; font-size: .5rem; font-weight: 700;
+      letter-spacing: 2px; padding: 2px 8px; border-radius: 3px;
+      white-space: nowrap; text-transform: uppercase;
+      animation: pulseBadge 1.6s ease-in-out infinite;
+    }
+    .vt-dropdown {
+      display: none; position: absolute; top: 52px; left: 50%; transform: translateX(-50%);
+      width: 310px; background: #060e09; border: 1px solid rgba(0,255,70,0.18);
+      border-radius: 7px; padding: 1.3rem; z-index: 9999;
+      box-shadow: 0 0 50px rgba(0,255,70,0.07), 0 12px 40px rgba(0,0,0,0.75);
+      text-align: left; pointer-events: none;
+    }
+    .vt-dropdown::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--green), transparent); border-radius: 7px 7px 0 0; }
+
+    /* ── VT MODAL */
+    #vtOverlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 1rem; }
+    #vtOverlay.open { display: flex; }
+    .vt-modal { position: relative; max-width: 640px; width: 100%; background: #060e09; border: 1px solid rgba(0,255,70,0.18); border-radius: 10px; overflow: hidden; box-shadow: 0 0 120px rgba(0,255,70,0.06), 0 0 250px rgba(0,0,0,0.95); animation: vtSlideIn 0.45s cubic-bezier(.175,.885,.32,1.275); max-height: 92vh; overflow-y: auto; }
+    .vt-modal::-webkit-scrollbar { width: 4px; }
+    .vt-modal::-webkit-scrollbar-thumb { background: rgba(0,255,70,0.2); border-radius: 2px; }
+    @keyframes vtSlideIn { from { opacity: 0; transform: translateY(50px) scale(0.93); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+    .vt-modal-header { background: linear-gradient(135deg, rgba(0,255,70,0.06), rgba(0,255,70,0.01)); border-bottom: 1px solid rgba(0,255,70,0.09); padding: 2rem 2rem 1.6rem; text-align: center; position: relative; }
+    .vt-modal-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--green), transparent); }
+    .vt-modal-body { padding: 1.8rem 2rem 0; }
+    .vt-modal-footer { padding: 1.4rem 2rem 1.8rem; }
+    .vt-close-btn { position: absolute; top: 1rem; right: 1rem; background: none; border: 1px solid rgba(0,255,70,0.15); color: rgba(255,255,255,0.3); width: 30px; height: 30px; border-radius: 5px; cursor: pointer; font-size: .8rem; display: flex; align-items: center; justify-content: center; transition: all .2s; font-family: 'Barlow Condensed', sans-serif; }
+    .vt-close-btn:hover { border-color: var(--green); color: var(--green); background: rgba(0,255,70,0.07); }
+    .vt-rank-preview { display: flex; align-items: center; justify-content: center; gap: .35rem; flex-wrap: wrap; margin-top: 1rem; }
+    .vt-rank-chip { font-family: 'Barlow Condensed', sans-serif; font-size: .6rem; letter-spacing: 1px; padding: 2px 7px; border-radius: 3px; border: 1px solid; text-transform: uppercase; white-space: nowrap; }
+    .vt-feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin-bottom: 1.4rem; }
+    .vt-feature-card { background: rgba(0,255,70,0.02); border: 1px solid rgba(0,255,70,0.07); border-radius: 5px; padding: .85rem 1rem; transition: background .2s, border-color .2s; }
+    .vt-feature-card:hover { background: rgba(0,255,70,0.05); border-color: rgba(0,255,70,0.18); }
+    .vt-progress-bar-bg { height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin: .45rem 0 .3rem; }
+    .vt-progress-bar-fill { height: 100%; width: 75%; background: linear-gradient(90deg, #00cc38, #00ff46, #66ffaa); border-radius: 4px; box-shadow: 0 0 12px rgba(0,255,70,0.55); position: relative; overflow: hidden; }
+    .vt-progress-bar-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%); animation: shimmer 2s ease-in-out infinite; }
+    .vt-enter-btn { width: 100%; background: var(--green); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem; letter-spacing: 4px; padding: .85rem; border-radius: 5px; cursor: pointer; box-shadow: 0 0 30px rgba(0,255,70,0.45); transition: opacity .2s, box-shadow .2s, transform .15s; }
+    .vt-enter-btn:hover { opacity: .88; box-shadow: 0 0 50px rgba(0,255,70,0.7); transform: translateY(-2px); }
+    .vt-section-label { font-family: 'Barlow Condensed', sans-serif; font-size: .68rem; letter-spacing: 3px; color: rgba(255,255,255,0.2); text-transform: uppercase; margin-bottom: .7rem; text-align: center; }
+
+    /* ── PAGE STYLES */
+    .hero { position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 2rem 4rem; overflow: hidden; }
+    .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.22; z-index: 0; }
+    .hero-overlay { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(0,255,70,0.06) 0%, transparent 70%), linear-gradient(to bottom, rgba(5,8,10,0.3) 0%, rgba(5,8,10,0.0) 40%, rgba(5,8,10,0.8) 100%); z-index: 1; }
+    .hero-content { position: relative; z-index: 2; }
+    .hero-eyebrow { font-family: var(--font-ui); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.35em; color: var(--green); text-transform: uppercase; margin-bottom: 1.2rem; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+    .hero-title { font-family: var(--font-display); font-size: clamp(4rem, 12vw, 10rem); line-height: 0.92; letter-spacing: 0.04em; color: #fff; text-transform: uppercase; text-shadow: 0 0 40px rgba(0,255,70,0.25), 0 0 120px rgba(0,255,70,0.1); opacity: 0; animation: fadeUp 0.8s 0.4s forwards; }
+    .hero-title .accent { color: var(--green); }
+    .hero-sub { font-family: var(--font-ui); font-size: clamp(1rem, 2.5vw, 1.5rem); font-weight: 600; letter-spacing: 0.2em; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-top: 1.2rem; opacity: 0; animation: fadeUp 0.8s 0.6s forwards; }
+    .hero-cta { display: inline-block; margin-top: 3rem; padding: 1rem 3.5rem; background: var(--green); color: #000; font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.15em; text-decoration: none; text-transform: uppercase; border-radius: 2px; box-shadow: 0 0 30px rgba(0,255,70,0.4), 0 0 60px rgba(0,255,70,0.15); transition: background 0.2s, box-shadow 0.2s, transform 0.15s; opacity: 0; animation: fadeUp 0.8s 0.8s forwards; cursor: pointer; }
+    .hero-cta:hover { background: #fff; box-shadow: 0 0 50px rgba(0,255,70,0.6), 0 0 100px rgba(0,255,70,0.2); transform: translateY(-2px) scale(1.02); }
+    .hero-scroll { position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0; animation: fadeIn 1s 1.5s forwards; }
+    .hero-scroll span { font-family: var(--font-ui); font-size: 0.7rem; letter-spacing: 0.25em; color: rgba(255,255,255,0.25); text-transform: uppercase; }
+    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--green), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+    section { padding: 7rem 2rem; max-width: 1100px; margin: 0 auto; }
+    .section-label { font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.4em; color: var(--green); text-transform: uppercase; margin-bottom: 1rem; }
+    .section-title { font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 5rem); letter-spacing: 0.06em; color: #fff; line-height: 1; margin-bottom: 2rem; }
+    .divider { width: 60px; height: 2px; background: var(--green); margin-bottom: 2.5rem; box-shadow: 0 0 12px rgba(0,255,70,0.5); }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .about-text p { font-size: 1.1rem; line-height: 1.85; color: rgba(200,216,200,0.8); }
+    .about-text p strong { color: #fff; font-weight: 500; }
+    .about-stat-block { display: flex; flex-direction: column; gap: 1.5rem; }
+    .stat { border-left: 2px solid var(--green); padding-left: 1.5rem; }
+    .stat-num { font-family: var(--font-display); font-size: 3.5rem; color: var(--green); line-height: 1; text-shadow: 0 0 20px rgba(0,255,70,0.4); }
+    .stat-label { font-family: var(--font-ui); font-size: 0.85rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-top: 4px; }
+    .features-wrap { background: rgba(0,255,70,0.025); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 7rem 2rem; }
+    .features-inner { max-width: 1100px; margin: 0 auto; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .feature-item { background: var(--bg); padding: 2rem 1.8rem; transition: background 0.25s; }
+    .feature-item:hover { background: rgba(0,255,70,0.05); }
+    .feature-icon { font-size: 1.8rem; margin-bottom: 0.8rem; }
+    .feature-title { font-family: var(--font-ui); font-size: 1rem; font-weight: 700; letter-spacing: 0.1em; color: #fff; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .feature-desc { font-size: 0.88rem; line-height: 1.65; color: rgba(200,216,200,0.55); }
+    .worlds-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); overflow: hidden; border-radius: 4px; margin-top: 3rem; }
+    .world-card { background: var(--bg); padding: 3rem 2rem; position: relative; overflow: hidden; transition: background 0.3s; }
+    .world-card::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; transition: opacity 0.3s; opacity: 0; }
+    .world-card.neon::before { background: #00ffcc; }
+    .world-card.dark::before { background: #aa00ff; }
+    .world-card.void::before { background: var(--green); }
+    .world-card:hover { background: rgba(0,255,70,0.04); }
+    .world-card:hover::before { opacity: 1; }
+    .world-emoji { font-size: 2.2rem; margin-bottom: 1rem; }
+    .world-name { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.1em; color: #fff; margin-bottom: 0.3rem; }
+    .world-tagline { font-family: var(--font-ui); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.25em; color: var(--green); text-transform: uppercase; margin-bottom: 1rem; }
+    .world-desc { font-size: 0.9rem; line-height: 1.7; color: rgba(200,216,200,0.55); }
+    .world-levels { display: inline-block; margin-top: 1.5rem; font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.2em; color: var(--green); border: 1px solid var(--border); padding: 4px 12px; border-radius: 2px; text-transform: uppercase; }
+    .studio-wrap { text-align: center; max-width: 720px; margin: 0 auto; padding: 7rem 2rem; }
+    .studio-wrap .section-title { margin-bottom: 1.5rem; }
+    .studio-wrap .divider { margin: 0 auto 2.5rem; }
+    .studio-text { font-size: 1.05rem; line-height: 1.9; color: rgba(200,216,200,0.7); margin-bottom: 1rem; }
+    .studio-tagline { font-family: var(--font-ui); font-size: 1rem; font-weight: 700; letter-spacing: 0.15em; color: var(--green); text-transform: uppercase; margin-top: 2.5rem; }
+    .live-bar { background: rgba(0,255,70,0.04); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 2rem 2rem; }
+    .live-bar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 4rem; flex-wrap: wrap; }
+    .live-stat { text-align: center; }
+    .live-num { font-family: 'Orbitron', sans-serif; font-size: 2.4rem; font-weight: 900; color: var(--green); line-height: 1; text-shadow: 0 0 20px rgba(0,255,70,0.5); }
+    .live-label { font-family: var(--font-ui); font-size: 0.75rem; letter-spacing: 0.25em; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-top: 6px; }
+    .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); margin-right: 6px; animation: livePulse 1.5s ease-in-out infinite; }
+    @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+    .live-divider { width: 1px; height: 40px; background: var(--border); }
+    .news-patch-wrap { max-width: 1100px; margin: 0 auto; padding: 7rem 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+    .np-card { background: rgba(0,255,70,0.025); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .np-card-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .np-card-title { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 3px; color: #fff; }
+    .np-card-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; color: var(--green); text-transform: uppercase; border: 1px solid rgba(0,255,70,0.3); padding: 3px 10px; border-radius: 2px; }
+    .np-item { padding: 1.25rem 2rem; border-bottom: 1px solid rgba(0,255,70,0.06); transition: background 0.2s; }
+    .np-item:last-child { border-bottom: none; }
+    .np-item:hover { background: rgba(0,255,70,0.03); }
+    .np-item-date { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; letter-spacing: 2px; color: rgba(255,255,255,0.25); text-transform: uppercase; margin-bottom: 4px; }
+    .np-item-title { font-family: var(--font-ui); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; color: #fff; margin-bottom: 4px; }
+    .np-item-body { font-size: 0.85rem; line-height: 1.6; color: rgba(200,216,200,0.55); }
+    .np-item-tag { display: inline-block; margin-top: 8px; font-family: var(--font-ui); font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 2px; }
+    .np-item-tag.fix { background: rgba(255,170,0,0.1); color: #ffaa00; border: 1px solid rgba(255,170,0,0.3); }
+    .np-item-tag.new { background: rgba(0,255,70,0.1); color: var(--green); border: 1px solid rgba(0,255,70,0.3); }
+    .np-item-tag.update { background: rgba(100,150,255,0.1); color: #6496ff; border: 1px solid rgba(100,150,255,0.3); }
+    .np-item-tag.event { background: rgba(255,68,68,0.1); color: #ff4444; border: 1px solid rgba(255,68,68,0.3); }
+    .np-item-tag.beta { background: rgba(0,255,70,0.08); color: var(--green); border: 1px solid rgba(0,255,70,0.4); }
+    .final-cta { text-align: center; padding: 8rem 2rem; position: relative; overflow: hidden; }
+    .final-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(0,255,70,0.07) 0%, transparent 70%); }
+    .final-cta-title { font-family: var(--font-display); font-size: clamp(3rem, 8vw, 7rem); letter-spacing: 0.06em; color: #fff; line-height: 1; position: relative; }
+    .final-cta-sub { font-family: var(--font-ui); font-size: 1rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-top: 1rem; position: relative; }
+    .final-cta .hero-cta { margin-top: 2.5rem; opacity: 1; animation: none; position: relative; }
+    footer { border-top: 1px solid var(--border); padding: 2.5rem 4rem; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); }
+    .footer-logo span { color: var(--green); }
+    .footer-tagline { font-family: var(--font-ui); font-size: 0.8rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.2); text-transform: uppercase; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scrollPulse { 0%, 100% { opacity: 0.3; transform: scaleY(1); } 50% { opacity: 1; transform: scaleY(1.2); } }
+    .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    @media (max-width: 768px) { nav { padding: 0 1.5rem; } .about-grid { grid-template-columns: 1fr; gap: 3rem; } .features-grid { grid-template-columns: 1fr; } .worlds-grid { grid-template-columns: 1fr; } .news-patch-wrap { grid-template-columns: 1fr; } .live-divider { display: none; } footer { flex-direction: column; gap: 1rem; text-align: center; } .vt-feature-grid { grid-template-columns: 1fr; } }
+  </style>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+</head>
+<body>
+  
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- ════════════════════════════════════════════
+       VOID TRIALS — BETA ACCESS MODAL
+  ════════════════════════════════════════════ -->
+  <div id="vtOverlay">
+    <div class="vt-modal">
+
+      <div class="vt-modal-header">
+        <button class="vt-close-btn" onclick="closeVT()">✕</button>
+        <div style="font-size:3rem;margin-bottom:.65rem;filter:drop-shadow(0 0 28px rgba(0,255,70,0.7));">⚔️</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2.7rem;color:#fff;letter-spacing:6px;line-height:1;margin-bottom:.5rem;">THE VOID TRIALS</div>
+
+        <!-- Status badges -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--green);border:1px solid rgba(0,255,70,0.45);padding:4px 14px;border-radius:3px;background:rgba(0,255,70,0.08);animation:pulseBadge 1.6s ease-in-out infinite;">⚡ Early Beta Access</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,210,80,0.95);border:1px solid rgba(255,210,80,0.25);padding:4px 12px;border-radius:3px;background:rgba(255,210,80,0.06);">⚠️ Bugs Expected</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(100,180,255,0.9);border:1px solid rgba(100,180,255,0.2);padding:4px 12px;border-radius:3px;background:rgba(100,180,255,0.05);">🔵 Season 1 Live</div>
+        </div>
+
+        <p style="font-family:'Barlow',sans-serif;font-size:.87rem;color:rgba(200,220,200,0.62);line-height:1.7;max-width:470px;margin:0 auto 1rem;">
+          VoidRun's <strong style="color:#fff;">ranked competitive mode</strong> is now in early beta. Survive as long as you can, earn RP, and battle through <strong style="color:#fff;">9 rank tiers</strong> — from Void Recruit to <strong style="color:var(--green);">👑 Void Legend</strong>. It's real, it works, and <strong style="color:var(--green);">your RP carries into the full release.</strong>
+        </p>
+
+        <!-- Full 9-rank ladder -->
+        <div class="vt-rank-preview">
+          <span class="vt-rank-chip" style="color:#7a8a7a;border-color:rgba(122,138,122,0.3);background:rgba(122,138,122,0.06);">🌫️ Recruit</span>
+          <span style="color:rgba(255,255,255,0.15);font-size:.5rem;">▶</span>
+          <span class="vt-rank-chip" style="color:#4a9e5c;border-color:rgba(74,158,92,0.3);background:rgba(74,158,92,0.06);">💨 Runner</span>
+          <span style="color:rgba(255,255,255,0.15);font-size:.5rem;">▶</span>
+          <span class="vt-rank-chip" style="color:#4a8fbd;border-color:rgba(74,143,189,0.3);background:rgba(74,143,189,0.06);">⚡ Striker</span>
+          <span style="color:rgba(255,255,255,0.15);font-size:.5rem;">▶</span>
+          <span class="vt-rank-chip" style="color:#9b8fde;border-color:rgba(155,143,222,0.3);background:rgba(155,143,222,0.06);">👻 Phantom</span>
+          <span style="color:rgba(255,255,255,0.15);font-size:.5rem;">▶</span>
+          <span class="vt-rank-chip" style="color:#c0392b;border-color:rgba(192,57,43,0.3);background:rgba(192,57,43,0.06);">🎯 Hunter</span>
+          <span style="color:rgba(255,255,255,0.15);font-size:.5rem;">▶</span>
+          <span class="vt-rank-chip" style="color:#e67e22;border-color:rgba(230,126,34,0.3);background:rgba(230,126,34,0.06);">💥 Breaker</span>
+          <span style="color:rgba(255,255,255,0.15);font-size:.5rem;">▶</span>
+          <span class="vt-rank-chip" style="color:#cc0033;border-color:rgba(204,0,51,0.3);background:rgba(204,0,51,0.06);">👁️ Tyrant</span>
+          <span style="color:rgba(255,255,255,0.15);font-size:.5rem;">▶</span>
+          <span class="vt-rank-chip" style="color:#ff6600;border-color:rgba(255,102,0,0.3);background:rgba(255,102,0,0.06);">🔥 Ascendant</span>
+          <span style="color:rgba(255,255,255,0.15);font-size:.5rem;">▶</span>
+          <span class="vt-rank-chip" style="color:var(--green);border-color:rgba(0,255,70,0.4);background:rgba(0,255,70,0.08);">👑 Legend</span>
+        </div>
+      </div>
+
+      <div class="vt-modal-body">
+
+        <!-- Beta warning -->
+        <div style="background:rgba(255,210,80,0.04);border:1px solid rgba(255,210,80,0.16);border-radius:5px;padding:.75rem 1rem;display:flex;align-items:flex-start;gap:.7rem;margin-bottom:1.4rem;">
+          <span style="font-size:1rem;flex-shrink:0;margin-top:1px;">⚠️</span>
+          <div style="font-family:'Barlow',sans-serif;font-size:.78rem;color:rgba(255,220,120,0.82);line-height:1.55;">
+            <strong style="color:rgba(255,230,130,1);">Early beta — expect rough edges.</strong> Some features are still in development. Bugs, balance tweaks, and missing UI may occur. Your <strong style="color:rgba(255,230,130,1);">RP and rank are permanently saved</strong> and carry into full release.
+          </div>
+        </div>
+
+        <!-- How RP works -->
+        <div class="vt-section-label">How RP Works</div>
+        <div style="background:rgba(0,255,70,0.025);border:1px solid rgba(0,255,70,0.07);border-radius:5px;padding:1rem 1.2rem;margin-bottom:1.4rem;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
+            <div style="font-family:'Barlow',sans-serif;font-size:.78rem;color:rgba(200,220,200,0.65);line-height:1.65;">
+              <div style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.5rem;">⏱ Survival = RP</div>
+              <div>Under 8s → <strong style="color:#ff5555;">−8 RP</strong></div>
+              <div>8 – 20s → <strong style="color:#fff;">+8 RP</strong></div>
+              <div>20 – 40s → <strong style="color:#fff;">+18 RP</strong></div>
+              <div>40 – 70s → <strong style="color:#fff;">+32 RP</strong></div>
+              <div>70 – 120s → <strong style="color:#fff;">+50 RP</strong></div>
+              <div>120 – 180s → <strong style="color:#fff;">+70 RP</strong></div>
+              <div>180s+ → <strong style="color:var(--green);">+100 RP MAX</strong></div>
+            </div>
+            <div style="font-family:'Barlow',sans-serif;font-size:.78rem;color:rgba(200,220,200,0.65);line-height:1.7;">
+              <div style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.5rem;">🛡 Protections</div>
+              <div>✓ <strong style="color:#fff;">RP floor per rank</strong> — can't drop below tier minimum</div><br>
+              <div>✓ <strong style="color:#fff;">Loss streak shield</strong> — reduced penalty after 3+ losses</div><br>
+              <div>✓ <strong style="color:#fff;">Daily first-win 2× bonus</strong> — stack your gains</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live features -->
+        <div class="vt-section-label">What's Live in Beta</div>
+        <div class="vt-feature-grid">
+          <div class="vt-feature-card">
+            <div style="font-size:1.05rem;margin-bottom:.3rem;">🏆</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:#fff;letter-spacing:.5px;margin-bottom:.2rem;">9 Full Rank Tiers</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:.71rem;color:rgba(200,220,200,0.4);line-height:1.45;">Every tier has its own emblem, color, RP range, and description.</div>
+          </div>
+          <div class="vt-feature-card">
+            <div style="font-size:1.05rem;margin-bottom:.3rem;">📊</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:#fff;letter-spacing:.5px;margin-bottom:.2rem;">Live RP Tracking</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:.71rem;color:rgba(200,220,200,0.4);line-height:1.45;">RP updates in real time after every run with a progress bar.</div>
+          </div>
+          <div class="vt-feature-card">
+            <div style="font-size:1.05rem;margin-bottom:.3rem;">⚡</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:#fff;letter-spacing:.5px;margin-bottom:.2rem;">RP Floor System</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:.71rem;color:rgba(200,220,200,0.4);line-height:1.45;">You cannot drop below your rank's RP floor. Demotions require sustained losses.</div>
+          </div>
+          <div class="vt-feature-card">
+            <div style="font-size:1.05rem;margin-bottom:.3rem;">🎖️</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:#fff;letter-spacing:.5px;margin-bottom:.2rem;">Rank Emblems</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:.71rem;color:rgba(200,220,200,0.4);line-height:1.45;">Unique icon and color per rank shown on your profile and ranked hub.</div>
+          </div>
+          <div class="vt-feature-card">
+            <div style="font-size:1.05rem;margin-bottom:.3rem;">🗓️</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:#fff;letter-spacing:.5px;margin-bottom:.2rem;">Season 1 Active</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:.71rem;color:rgba(200,220,200,0.4);line-height:1.45;">The first ranked season is live right now. Climb before it resets.</div>
+          </div>
+          <div class="vt-feature-card">
+            <div style="font-size:1.05rem;margin-bottom:.3rem;">🔥</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:#fff;letter-spacing:.5px;margin-bottom:.2rem;">Daily 2× Bonus</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:.71rem;color:rgba(200,220,200,0.4);line-height:1.45;">First winning run each day earns double RP. Log in daily to climb faster.</div>
+          </div>
+        </div>
+
+        <!-- Coming in full release pills -->
+        <div class="vt-section-label" style="margin-bottom:.6rem;">Still Coming — Full Release</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:1.4rem;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:.67rem;color:rgba(255,255,255,0.27);border:1px solid rgba(255,255,255,0.07);padding:3px 10px;border-radius:3px;">🌍 Global Leaderboard</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:.67rem;color:rgba(255,255,255,0.27);border:1px solid rgba(255,255,255,0.07);padding:3px 10px;border-radius:3px;">🔄 Seasonal Resets</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:.67rem;color:rgba(255,255,255,0.27);border:1px solid rgba(255,255,255,0.07);padding:3px 10px;border-radius:3px;">🏅 Beta Tester Badge</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:.67rem;color:rgba(255,255,255,0.27);border:1px solid rgba(255,255,255,0.07);padding:3px 10px;border-radius:3px;">📅 End-of-Season Rewards</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:.67rem;color:rgba(255,255,255,0.27);border:1px solid rgba(255,255,255,0.07);padding:3px 10px;border-radius:3px;">📈 Win Streak Multipliers</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:.67rem;color:rgba(255,255,255,0.27);border:1px solid rgba(255,255,255,0.07);padding:3px 10px;border-radius:3px;">🛡 Demotion Protection</span>
+        </div>
+
+        <!-- Progress bar -->
+        <div style="margin-bottom:1.4rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.1rem;">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.68rem;letter-spacing:2px;color:rgba(255,255,255,0.2);text-transform:uppercase;">Beta Completion</span>
+            <span style="font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--green);font-weight:700;">75%</span>
+          </div>
+          <div class="vt-progress-bar-bg"><div class="vt-progress-bar-fill"></div></div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(255,255,255,0.15);">Beta Launch</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(255,255,255,0.15);">Full Release</span>
+          </div>
+        </div>
+
+        <!-- Status strip -->
+        <div style="background:rgba(0,255,70,0.03);border:1px solid rgba(0,255,70,0.09);border-radius:5px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1.4rem;">
+          <div style="display:flex;align-items:center;gap:.55rem;">
+            <span style="font-size:.9rem;">🟢</span>
+            <div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(255,255,255,0.2);letter-spacing:2px;text-transform:uppercase;">Status</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--green);letter-spacing:2px;">Live — Early Beta</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.55rem;">
+            <span style="font-size:.9rem;">🏅</span>
+            <div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(255,255,255,0.2);letter-spacing:2px;text-transform:uppercase;">Play now & earn</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#fff;letter-spacing:2px;">Exclusive Beta Badge</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.55rem;">
+            <span style="font-size:.9rem;">📁</span>
+            <div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(255,255,255,0.2);letter-spacing:2px;text-transform:uppercase;">Your progress</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#fff;letter-spacing:2px;">Saved to Full Release</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="vt-modal-footer">
+        <button class="vt-enter-btn" onclick="window.location.href='voidtrials.html'">⚔️ Enter The Void Trials Beta →</button>
+        <div style="text-align:center;margin-top:.65rem;">
+          <span onclick="closeVT()" style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:rgba(255,255,255,0.18);letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:color .2s;"
+            onmouseenter="this.style.color='rgba(255,255,255,0.4)'" onmouseleave="this.style.color='rgba(255,255,255,0.18)'">Not now — maybe later</span>
+        </div>
+      </div>
+
+      <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,70,0.3),transparent);"></div>
+    </div>
+  </div>
+
+  <nav>
+    <div class="nav-logo">VOID<span>RUN</span></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+
+      <!-- VOID TRIALS — beta badge + hover dropdown -->
+      <a href="#" onclick="openVT(event)" class="vt-nav-link"
+        onmouseenter="document.getElementById('vtDropdown').style.display='block'"
+        onmouseleave="document.getElementById('vtDropdown').style.display='none'">
+        Void Trials
+        <span class="vt-badge">⚡ Beta</span>
+
+        <div class="vt-dropdown" id="vtDropdown">
+          <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.85rem;">
+            <span style="font-size:1.2rem;">⚔️</span>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#fff;letter-spacing:3px;line-height:1;">THE VOID TRIALS</div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:.63rem;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-top:1px;">⚡ Beta Live · Click to Enter</div>
+            </div>
+          </div>
+          <div style="height:1px;background:rgba(0,255,70,0.09);margin-bottom:.85rem;"></div>
+          <p style="font-family:'Barlow',sans-serif;font-size:.76rem;color:rgba(200,220,200,0.58);line-height:1.55;margin-bottom:.8rem;">Ranked survival mode. Earn RP, survive longer, climb 9 tiers to <strong style="color:var(--green);">👑 Void Legend</strong>. <strong style="color:#fff;">Your progress saves forever.</strong></p>
+          <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(0,255,70,0.65);border:1px solid rgba(0,255,70,0.18);padding:2px 7px;border-radius:2px;">9 Ranks</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(0,255,70,0.65);border:1px solid rgba(0,255,70,0.18);padding:2px 7px;border-radius:2px;">Live RP</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(0,255,70,0.65);border:1px solid rgba(0,255,70,0.18);padding:2px 7px;border-radius:2px;">Season 1</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(0,255,70,0.65);border:1px solid rgba(0,255,70,0.18);padding:2px 7px;border-radius:2px;">Daily 2× Bonus</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(0,255,70,0.65);border:1px solid rgba(0,255,70,0.18);padding:2px 7px;border-radius:2px;">RP Floor</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:.35rem;">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:1.5px;color:rgba(255,255,255,0.2);text-transform:uppercase;">Beta Progress</span>
+            <span style="font-family:'Orbitron',sans-serif;font-size:.62rem;color:var(--green);">75%</span>
+          </div>
+          <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;">
+            <div style="width:75%;height:100%;background:linear-gradient(90deg,#00cc38,#00ff46);border-radius:2px;box-shadow:0 0 8px rgba(0,255,70,0.5);"></div>
+          </div>
+          <div style="margin-top:.7rem;font-family:'Barlow Condensed',sans-serif;font-size:.61rem;color:rgba(255,255,255,0.17);letter-spacing:1px;text-align:center;text-transform:uppercase;">↑ Click for full details & entry</div>
+        </div>
+      </a>
+
+      <a href="play.html">Play</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a class="nav-dashboard-btn" href="dashboard.html">Dashboard</a>
+      <a href="friends.html">Friends</a>
+      <a href="profile.html">Profile</a>
+      <a href="contact.html">Contact</a>
+      <a href="credits.html">Credits</a>
+      <a id="loginBtn" href="login.html">Login</a>
+      <div id="navUser">
+        <span id="navUsername"></span>
+        <button id="navLogout">Logout</button>
+      </div>
+      <a href="settings.html" class="settings-btn" id="settingsBtn" onclick="return checkSettingsAccess(event)">
+        <span class="s-icon">⚙</span>
+        <span class="s-text">Settings</span>
+      </a>
+    </div>
+  </nav>
+
+  <section class="hero" style="max-width:100%; padding-left:0; padding-right:0;">
+    <video class="hero-video" autoplay muted loop playsinline><source src="assets/hero.mp4" type="video/mp4"></video>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">VoidRun.Inc Presents</p>
+      <h1 class="hero-title">THE VOID<br><span class="accent">DOESN'T WAIT.</span></h1>
+      <p class="hero-sub">VOID RUN — 66 levels. One shot. No mercy.</p>
+      <a class="hero-cta" href="play.html">PLAY NOW →</a>
+    </div>
+    <div class="hero-scroll"><div class="scroll-line"></div><span>Scroll</span></div>
+  </section>
+
+  <section>
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p class="section-label">About the Game</p>
+        <h2 class="section-title">WHAT IS<br>VOID RUN?</h2>
+        <div class="divider"></div>
+        <p>You run. The void chases. <strong>Simple as that.</strong></p><br>
+        <p>Void Run is a brutally fast endless runner built for players who want a real challenge. Dodge, jump, shoot, and survive through <strong>Neon City, Dark Zone, and the Void Realm</strong> — each section harder, faster, and more chaotic than the last.</p><br>
+        <p>At the end waits the <strong>Void Tyrant</strong>. Good luck.</p>
+      </div>
+      <div class="about-stat-block">
+        <div class="stat"><div class="stat-num">66</div><div class="stat-label">Handcrafted Levels</div></div>
+        <div class="stat"><div class="stat-num">3</div><div class="stat-label">Brutal Worlds</div></div>
+        <div class="stat"><div class="stat-num">6</div><div class="stat-label">Unique Perks</div></div>
+        <div class="stat"><div class="stat-num">1</div><div class="stat-label">Final Boss. No Mercy.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="features-wrap">
+    <div class="features-inner">
+      <div class="reveal" style="text-align:center; margin-bottom:3rem;">
+        <p class="section-label">Features</p>
+        <h2 class="section-title">WHAT'S INSIDE</h2>
+        <div class="divider" style="margin:0 auto;"></div>
+      </div>
+      <div class="features-grid reveal">
+        <div class="feature-item"><div class="feature-icon">⚡</div><div class="feature-title">66 Handcrafted Levels</div><div class="feature-desc">Three brutal sections. Every level designed by hand to push your reflexes further than the last.</div></div>
+        <div class="feature-item"><div class="feature-icon">👾</div><div class="feature-title">The Void Tyrant</div><div class="feature-desc">Survive all 66 levels and face the ultimate boss. He doesn't forgive. He doesn't forget.</div></div>
+        <div class="feature-item"><div class="feature-icon">🚀</div><div class="feature-title">6 Unique Perks</div><div class="feature-desc">Jetpack, Shield, Phase Ghost and more. Build your run. Own your playstyle.</div></div>
+        <div class="feature-item"><div class="feature-icon">🎮</div><div class="feature-title">3 Game Modes</div><div class="feature-desc">Levels, Time Trial & Orb Hunt. Each mode is its own kind of punishment.</div></div>
+        <div class="feature-item"><div class="feature-icon">📋</div><div class="feature-title">Quest System</div><div class="feature-desc">Daily and weekly challenges that keep you coming back. Always something to chase.</div></div>
+        <div class="feature-item"><div class="feature-icon">🎵</div><div class="feature-title">Original Soundtrack</div><div class="feature-desc">Music built for the void. Every track crafted to match the chaos you're running through.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="reveal" style="text-align:center; margin-bottom:0;">
+      <p class="section-label">The Worlds</p>
+      <h2 class="section-title">THREE WORLDS.<br>ZERO MERCY.</h2>
+      <div class="divider" style="margin: 0 auto;"></div>
+    </div>
+    <div class="worlds-grid reveal">
+      <div class="world-card neon"><div class="world-emoji">🌆</div><div class="world-name">NEON CITY</div><div class="world-tagline">Learn the rules.</div><div class="world-desc">22 levels of neon-lit chaos to ease you in. The city glows. The gaps don't forgive.</div><div class="world-levels">22 Levels</div></div>
+      <div class="world-card dark"><div class="world-emoji">🌑</div><div class="world-name">DARK ZONE</div><div class="world-tagline">Break the rules.</div><div class="world-desc">Speed ramps up, enemies hit harder, and the gaps get wider. Nothing here plays fair.</div><div class="world-levels">22 Levels</div></div>
+      <div class="world-card void"><div class="world-emoji">🌀</div><div class="world-name">VOID REALM</div><div class="world-tagline">There are no rules.</div><div class="world-desc">The fastest, most brutal section in the game. The Tyrant awaits at the end. Good luck.</div><div class="world-levels">22 Levels + Boss</div></div>
+    </div>
+  </section>
+
+  <div class="features-wrap">
+    <div class="studio-wrap reveal">
+      <p class="section-label">The Studio</p>
+      <h2 class="section-title">ABOUT<br>VOIDRUN.INC</h2>
+      <div class="divider"></div>
+      <p class="studio-text">We're VoidRun.Inc — a small indie studio with one mission: build games that feel incredible to play.</p>
+      <p class="studio-text">Void Run started as an idea and became something we're genuinely proud of. Every level, every perk, every sound was built by hand. We don't do bloat. We do fast, tight, replayable games that respect your time and punish your mistakes.</p>
+      <p class="studio-text">This is just the beginning.</p>
+      <p class="studio-tagline">VoidRun.Inc — We build worlds you can barely escape.</p>
+    </div>
+  </div>
+
+  <div class="live-bar reveal">
+    <div class="live-bar-inner">
+      <div class="live-stat"><div class="live-num"><span class="live-dot"></span><span id="liveOnline">—</span></div><div class="live-label">Players Online Now</div></div>
+      <div class="live-divider"></div>
+      <div class="live-stat"><div class="live-num" id="livePlayed">—</div><div class="live-label">Total Games Played</div></div>
+      <div class="live-divider"></div>
+      <div class="live-stat"><div class="live-num" id="liveDeaths">—</div><div class="live-label">Total Deaths</div></div>
+      <div class="live-divider"></div>
+      <div class="live-stat"><div class="live-num" id="liveMembers">—</div><div class="live-label">Registered Players</div></div>
+    </div>
+  </div>
+
+  <div class="news-patch-wrap">
+    <div class="np-card reveal">
+      <div class="np-card-header"><div class="np-card-title">NEWS</div><div class="np-card-tag">📢 Latest</div></div>
+      <div class="np-item">
+        <div class="np-item-date">Mar 17, 2026</div>
+        <div class="np-item-title">Void Trials Beta is NOW LIVE.</div>
+        <div class="np-item-body">The ranked mode is open for early beta. Survive, earn RP, and climb 9 tiers. Your rank and RP carry to full release — plus all beta testers earn an exclusive badge.</div>
+        <span class="np-item-tag beta">⚡ Beta Live</span>
+      </div>
+      <div class="np-item">
+        <div class="np-item-date">Mar 5, 2026</div>
+        <div class="np-item-title">Dashboard + World Map live.</div>
+        <div class="np-item-body">Track your level progress across all 66 levels on the new World Map. The Dashboard brings your stats, friends, and season info into one place.</div>
+        <span class="np-item-tag update">Update</span>
+      </div>
+      <div class="np-item">
+        <div class="np-item-date">Feb 20, 2026</div>
+        <div class="np-item-title">Season 1 has begun.</div>
+        <div class="np-item-body">The first VoidRun season is now live. Ranked resets at season end — climb as high as you can before the void resets everything.</div>
+        <span class="np-item-tag event">Season</span>
+      </div>
+    </div>
+    <div class="np-card reveal">
+      <div class="np-card-header"><div class="np-card-title">PATCH NOTES</div><div class="np-card-tag">🔧 v2.1</div></div>
+      <div class="np-item">
+        <div class="np-item-date">v2.1 — Mar 8, 2026</div>
+        <div class="np-item-title">Profile & Score Tracking Overhaul</div>
+        <div class="np-item-body">Fixed score syncing to Firestore. Recent games now display correctly on your profile. Best score and games played update in real-time.</div>
+        <span class="np-item-tag fix">Fix</span>
+      </div>
+      <div class="np-item">
+        <div class="np-item-date">v2.0 — Feb 28, 2026</div>
+        <div class="np-item-title">Friends System + Challenges</div>
+        <div class="np-item-body">Added friend requests, online status, and the ability to challenge friends to beat your score. Accept or decline from the Dashboard.</div>
+        <span class="np-item-tag new">New</span>
+      </div>
+      <div class="np-item">
+        <div class="np-item-date">v1.9 — Feb 10, 2026</div>
+        <div class="np-item-title">Ranked RP system + 9 tiers</div>
+        <div class="np-item-body">Void Recruit to Void Legend. RP is earned based on survival time. Demotions added below 0 RP. Progress bar on profile page.</div>
+        <span class="np-item-tag update">Update</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="final-cta reveal">
+    <h2 class="final-cta-title">ENTER<br>THE VOID.</h2>
+    <p class="final-cta-sub">Fast. Brutal. Replayable.</p>
+    <a class="hero-cta" href="play.html">PLAY NOW →</a>
+  </div>
+
+  <footer>
+    <div class="footer-logo">VOID<span>RUN</span></div>
+    <div class="footer-tagline">Built by VoidRun.Inc. Survived by few.</div>
+    <div class="footer-tagline">© 2026 VoidRun.Inc</div>
+  </footer>
+
+  <script src="js/firebase-auth.js"></script>
+  <script>
+    // ── Cursor
+    const cursor = document.getElementById("cursor");
+    const ring   = document.getElementById("cursorRing");
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener("mousemove", e => {
+      mx = e.clientX;
+      my = e.clientY;
+      cursor.style.left = mx + "px";
+      cursor.style.top  = my + "px";
+    });
+
+    (function animRing() {
+      rx += (mx - rx) * 0.15;
+      ry += (my - ry) * 0.15;
+      ring.style.left = rx + "px";
+      ring.style.top  = ry + "px";
+      requestAnimationFrame(animRing);
+    })();
+
+    document.querySelectorAll("a, button").forEach(el => {
+      el.addEventListener("mouseenter", () => {
+        cursor.style.transform = "translate(-50%,-50%) scale(2.5)";
+        ring.style.width  = "50px";
+        ring.style.height = "50px";
+      });
+      el.addEventListener("mouseleave", () => {
+        cursor.style.transform = "translate(-50%,-50%) scale(1)";
+        ring.style.width  = "32px";
+        ring.style.height = "32px";
+      });
+    });
+
+    // ── Reveal
+    const reveals = document.querySelectorAll(".reveal");
+    const observer = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("visible"); observer.unobserve(e.target); } }); }, { threshold: 0.1 });
+    reveals.forEach(r => observer.observe(r));
+
+    // ── Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp({ apiKey: "AIzaSyCD0gVXr7dDnKuIpqXjVet2vvI09ryPGvU", authDomain: "voidruninc.firebaseapp.com", projectId: "voidruninc", appId: "1:832807736710:web:fdfba2332c3aa274fc8807" });
+    }
+    const _db = firebase.firestore();
+
+    // ── Live stats
+    function countUp(el, target) {
+      const duration = 1200, start = Date.now();
+      const from = parseInt(el.textContent.replace(/\D/g,'')) || 0;
+      (function tick() {
+        const p = Math.min(1, (Date.now()-start)/duration);
+        const ease = 1-Math.pow(1-p,3);
+        el.textContent = Math.round(from + (target-from)*ease).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      })();
+    }
+    async function loadLiveStats() {
+      try {
+        const usersSnap = await _db.collection('users').get();
+        countUp(document.getElementById('liveMembers'), usersSnap.size);
+        let totalGames = 0, totalDeaths = 0;
+        usersSnap.forEach(doc => { const d = doc.data(); totalGames += d.gamesPlayed || 0; totalDeaths += d.totalDeaths || 0; });
+        countUp(document.getElementById('livePlayed'), totalGames);
+        countUp(document.getElementById('liveDeaths'), totalDeaths);
+        const fiveMinAgo = new Date(Date.now() - 5*60*1000);
+        const onlineSnap = await _db.collection('users').where('lastSeen', '>', fiveMinAgo).get();
+        countUp(document.getElementById('liveOnline'), onlineSnap.size);
+      } catch(e) {
+        ['liveOnline','livePlayed','liveDeaths','liveMembers'].forEach(id => { document.getElementById(id).textContent = '0'; });
+      }
+    }
+    loadLiveStats();
+
+    // ── Auth
+    firebase.auth().onAuthStateChanged(user => {
+      const loginBtn = document.getElementById("loginBtn");
+      const navUser = document.getElementById("navUser");
+      const navUsername = document.getElementById("navUsername");
+      const navLogout = document.getElementById("navLogout");
+      if (user) { loginBtn.style.display = "none"; navUser.classList.add("show"); navUsername.innerText = user.displayName || user.email; navLogout.onclick = () => firebase.auth().signOut().then(() => location.reload()); }
+      else { loginBtn.style.display = ""; navUser.classList.remove("show"); }
+    });
+
+    function checkSettingsAccess(e) {
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        e.preventDefault();
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.style.color = 'var(--green)';
+        loginBtn.style.borderColor = 'var(--green)';
+        loginBtn.textContent = '⚠ Login first';
+        setTimeout(() => { loginBtn.style.color = ''; loginBtn.style.borderColor = ''; loginBtn.textContent = 'Login'; }, 2000);
+        return false;
+      }
+      return true;
+    }
+
+    // ── Void Trials Modal
+    function openVT(e) {
+      if (e) e.preventDefault();
+      document.getElementById('vtDropdown').style.display = 'none';
+      document.getElementById('vtOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeVT() {
+      document.getElementById('vtOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.getElementById('vtOverlay').addEventListener('click', function(e) { if (e.target === this) closeVT(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVT(); });
+  </script>
+  <script src="js/voidbot.js"></script>
+
+  <a href="https://discord.gg/jczHyGZD" target="_blank" style="position:fixed;bottom:1.5rem;left:1.5rem;z-index:999;display:flex;align-items:center;gap:.6rem;background:#0d160d;border:1px solid rgba(88,101,242,.35);border-radius:6px;padding:10px 16px;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:2px;text-transform:uppercase;color:#5865F2;box-shadow:0 0 20px rgba(88,101,242,.1);transition:all .2s;" onmouseover="this.style.borderColor='rgba(88,101,242,.7)';this.style.boxShadow='0 0 24px rgba(88,101,242,.3)'" onmouseout="this.style.borderColor='rgba(88,101,242,.35)';this.style.boxShadow='0 0 20px rgba(88,101,242,.1)'">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="#5865F2" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.001.022.015.04.032.05a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+    Join Discord
+  </a>
+</body>
+</html>
