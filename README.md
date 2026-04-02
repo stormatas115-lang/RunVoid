@@ -95,7 +95,8 @@ The system is designed to separate UI, logic, and data handling for maintainabil
 ## Demo
 
 A demonstration video of the system can be found here:
-[INSERT VIDEO LINK]
+[https://www.youtube.com/watch?v=eU64P81g6q4]
+GAME TEST FROM THE WEBSITE THATS ALREADY UP [https://voidruninc.netlify.app/play]
 
 ---
 
