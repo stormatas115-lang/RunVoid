@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-85G1JY4Q01"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-85G1JY4Q01');
+</script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>VoidRun — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  --g:   #00ff46;
+  --g2:  #00cc38;
+  --r:   #ff3e6c;
+  --y:   #ffe600;
+  --b:   #4a9eff;
+  --bg:  #060c06;
+  --bg2: #0a120a;
+  --card:#0d160d;
+  --c2:  #111d11;
+  --brd: rgba(0,255,70,.12);
+  --brd2:rgba(0,255,70,.22);
+  --txt: #c4e6c4;
+  --mut: #3d5c3d;
+  --mut2:#5a7a5a;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:'Barlow',sans-serif; min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.03) 3px,rgba(0,0,0,.03) 4px),
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,255,70,.06) 0%, transparent 70%);
+}
+
+/* ─── LOADING ─────────────────────────────────────────────── */
+#loading{
+  position:fixed;inset:0;z-index:9999;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;
+  transition:opacity .5s;
+}
+#loading.hide{opacity:0;pointer-events:none;}
+.loader-logo{font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--g);
+  letter-spacing:8px;text-shadow:0 0 30px rgba(0,255,70,.6);animation:flicker 2s ease-in-out infinite;}
+@keyframes flicker{0%,100%{opacity:1;}50%{opacity:.7;}92%{opacity:.9;}94%{opacity:.4;}96%{opacity:.9;}}
+.loader-bar{width:200px;height:2px;background:var(--brd);border-radius:2px;overflow:hidden;}
+.loader-fill{height:100%;background:var(--g);box-shadow:0 0 8px var(--g);animation:load 1.2s ease forwards;}
+@keyframes load{from{width:0}to{width:100%}}
+
+/* ─── ACCESS DENIED ───────────────────────────────────────── */
+#accessDenied{
+  display:none;position:fixed;inset:0;z-index:9998;background:var(--bg);
+  align-items:center;justify-content:center;flex-direction:column;gap:.75rem;text-align:center;
+}
+#accessDenied.show{display:flex;}
+.ad-title{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:var(--r);letter-spacing:6px;
+  text-shadow:0 0 30px rgba(255,62,108,.4);}
+.ad-sub{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:3px;color:var(--mut);text-transform:uppercase;}
+.ad-uid{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--mut2);margin-top:.5rem;}
+.ad-back{margin-top:1.25rem;color:#000;background:var(--g);text-decoration:none;padding:10px 30px;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:3px;}
+
+/* ─── NAV ─────────────────────────────────────────────────── */
+nav{
+  display:flex;align-items:center;gap:1rem;
+  padding:0 1.75rem;height:56px;
+  background:rgba(6,12,6,.96);border-bottom:1px solid var(--brd);
+  position:sticky;top:0;z-index:100;backdrop-filter:blur(14px);
+}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.45rem;color:var(--g);letter-spacing:4px;
+  text-decoration:none;text-shadow:0 0 16px rgba(0,255,70,.4);}
+.nav-sep{width:1px;height:22px;background:var(--brd);flex-shrink:0;}
+.nav-tabs{display:flex;gap:0;flex:1;}
+.nav-tab{
+  background:none;border:none;color:var(--mut);cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;
+  padding:0 1rem;height:56px;border-bottom:2px solid transparent;transition:all .15s;
+  display:flex;align-items:center;gap:.4rem;white-space:nowrap;
+}
+.nav-tab:hover{color:var(--txt);}
+.nav-tab.active{color:var(--g);border-bottom-color:var(--g);}
+.nav-tab .ntab-badge{
+  background:var(--r);color:#fff;font-size:.6rem;font-weight:700;
+  border-radius:8px;padding:1px 5px;min-width:16px;text-align:center;
+}
+.nav-right{display:flex;align-items:center;gap:.6rem;margin-left:auto;}
+.nav-avatar{
+  width:30px;height:30px;border-radius:50%;background:var(--brd2);
+  border:1px solid var(--brd2);display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:var(--g);
+  text-shadow:0 0 8px rgba(0,255,70,.5);
+}
+.nav-user-info{display:flex;flex-direction:column;align-items:flex-end;}
+.nav-username{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:var(--g);letter-spacing:1px;}
+.nav-role{font-size:.62rem;color:var(--mut);letter-spacing:1.5px;text-transform:uppercase;}
+.nav-role.admin{color:var(--r);}
+.btn-logout{background:none;border:1px solid var(--brd);color:var(--mut);padding:4px 12px;border-radius:3px;
+  cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;transition:all .2s;}
+.btn-logout:hover{border-color:var(--r);color:var(--r);}
+
+/* ─── LAYOUT ──────────────────────────────────────────────── */
+#appBody{display:none;}
+#appBody.show{display:block;}
+.page{display:none;padding:2rem;max-width:1400px;margin:0 auto;position:relative;z-index:1;}
+.page.active{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── PAGE HEADERS ────────────────────────────────────────── */
+.pg-head{margin-bottom:1.75rem;}
+.pg-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:#fff;letter-spacing:5px;line-height:1;}
+.pg-sub{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--mut);margin-top:.3rem;}
+
+/* ─── CARDS / SECTIONS ────────────────────────────────────── */
+.sc{background:var(--card);border:1px solid var(--brd);border-radius:6px;padding:1.4rem;margin-bottom:1.25rem;position:relative;overflow:hidden;}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);}
+.sc.red::before{background:linear-gradient(90deg,transparent,var(--r),transparent);}
+.sc.yellow::before{background:linear-gradient(90deg,transparent,var(--y),transparent);}
+.sc.blue::before{background:linear-gradient(90deg,transparent,var(--b),transparent);}
+.sc-title{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;color:#fff;letter-spacing:3px;
+  margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.sc-title::after{content:'';flex:1;height:1px;background:var(--brd);}
+.sc-title .badge{font-size:.6rem;background:var(--g);color:#000;padding:2px 7px;border-radius:10px;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;font-weight:700;}
+.sc-title .badge.red{background:var(--r);color:#fff;}
+
+/* ─── GRID HELPERS ────────────────────────────────────────── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;}
+
+/* ─── STAT CHIPS ──────────────────────────────────────────── */
+.stat-chip{background:var(--card);border:1px solid var(--brd);border-radius:5px;padding:1rem;position:relative;overflow:hidden;}
+.stat-chip::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-chip.g::before{background:var(--g);}
+.stat-chip.r::before{background:var(--r);}
+.stat-chip.y::before{background:var(--y);}
+.stat-chip.b::before{background:var(--b);}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;}
+.stat-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin-top:3px;}
+.stat-delta{font-size:.65rem;margin-top:4px;}
+.stat-delta.up{color:var(--g);}
+.stat-delta.dn{color:var(--r);}
+
+/* ─── FRIEND CARDS ────────────────────────────────────────── */
+.friends-grid{display:flex;flex-direction:column;gap:.5rem;}
+.friend-row{
+  display:flex;align-items:center;gap:.85rem;
+  background:var(--c2);border:1px solid var(--brd);border-radius:5px;
+  padding:.75rem 1rem;transition:all .2s;cursor:default;
+  position:relative;overflow:hidden;
+}
+.friend-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--mut);transition:background .2s;}
+.friend-row.online::before{background:var(--g);box-shadow:0 0 8px var(--g);}
+.friend-row.recent::before{background:var(--y);}
+.friend-row:hover{border-color:var(--brd2);}
+.friend-avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;
+  border:1px solid var(--brd2);background:var(--card);
+  position:relative;
+}
+.friend-avatar .av-initial{color:var(--g);text-shadow:0 0 8px rgba(0,255,70,.5);}
+.friend-avatar .online-dot{
+  position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;
+  background:var(--g);border:2px solid var(--c2);
+  box-shadow:0 0 6px var(--g);
+  animation:pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 6px var(--g);}50%{box-shadow:0 0 12px var(--g),0 0 20px rgba(0,255,70,.3);}}
+.friend-info{flex:1;min-width:0;}
+.friend-name{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;color:#fff;letter-spacing:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.friend-status-row{display:flex;align-items:center;gap:.5rem;margin-top:2px;}
+.friend-status{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--mut);}
+.friend-status.online{color:var(--g);}
+.friend-status.recent{color:var(--y);}
+.friend-last{font-size:.68rem;color:var(--mut);font-family:'Barlow Condensed',sans-serif;}
+.friend-meta{display:flex;flex-direction:column;align-items:flex-end;gap:.25rem;flex-shrink:0;}
+.friend-score{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--g);}
+.friend-lv{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;color:var(--mut);letter-spacing:1px;}
+.friend-actions{display:flex;gap:.4rem;}
+
+/* ─── REQUEST CARDS ───────────────────────────────────────── */
+.req-card{
+  background:var(--c2);border:1px solid rgba(0,255,70,.2);border-radius:5px;
+  padding:.85rem 1rem;display:flex;align-items:center;gap:.85rem;
+}
+.req-card .req-avatar{width:34px;height:34px;border-radius:50%;background:var(--card);
+  border:1px solid var(--brd2);display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;color:var(--g);font-size:.95rem;flex-shrink:0;}
+.req-card .req-name{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;color:#fff;flex:1;}
+.req-card .req-code{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--mut);}
+.req-card .req-btns{display:flex;gap:.4rem;}
+
+/* ─── CHALLENGE CARDS ─────────────────────────────────────── */
+.chal-card{
+  background:var(--c2);border:1px solid var(--brd);border-radius:5px;
+  padding:.85rem 1rem;cursor:pointer;transition:all .2s;
+}
+.chal-card.unread{border-color:rgba(0,255,70,.35);background:rgba(0,255,70,.03);}
+.chal-card:hover{border-color:var(--brd2);}
+.chal-from{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;letter-spacing:2px;color:var(--g);
+  text-shadow:0 0 6px rgba(0,255,70,.4);text-transform:uppercase;}
+.chal-msg{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;color:var(--txt);margin:.25rem 0 0;line-height:1.4;}
+.chal-time{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--mut);margin-top:.35rem;}
+.unread-pip{width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 6px var(--g);display:inline-block;margin-left:.35rem;vertical-align:middle;}
+
+/* ─── MESSAGES ────────────────────────────────────────────── */
+.msg-layout{display:grid;grid-template-columns:220px 1fr;gap:1px;background:var(--brd);border-radius:6px;overflow:hidden;height:520px;}
+.msg-sidebar{background:var(--card);overflow-y:auto;display:flex;flex-direction:column;}
+.msg-sidebar-head{padding:.85rem 1rem;border-bottom:1px solid var(--brd);
+  font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--mut);}
+.msg-contact{
+  display:flex;align-items:center;gap:.65rem;padding:.65rem 1rem;cursor:pointer;
+  border-bottom:1px solid rgba(0,255,70,.04);transition:background .15s;
+  position:relative;
+}
+.msg-contact:hover{background:rgba(0,255,70,.04);}
+.msg-contact.active{background:rgba(0,255,70,.07);border-left:2px solid var(--g);}
+.msg-contact .mc-av{width:30px;height:30px;border-radius:50%;background:var(--c2);border:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:var(--g);flex-shrink:0;}
+.msg-contact .mc-dot{position:absolute;left:38px;bottom:10px;width:8px;height:8px;border-radius:50%;
+  background:var(--g);border:2px solid var(--card);box-shadow:0 0 5px var(--g);}
+.mc-info{flex:1;min-width:0;}
+.mc-name{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;color:var(--txt);}
+.mc-preview{font-size:.7rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mc-badge{background:var(--r);color:#fff;font-size:.6rem;font-weight:700;border-radius:8px;padding:1px 5px;}
+.msg-main{background:var(--bg2);display:flex;flex-direction:column;}
+.msg-main-head{padding:.85rem 1.25rem;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:.75rem;}
+.msg-main-name{font-family:'Barlow Condensed',sans-serif;font-size:1rem;color:#fff;letter-spacing:1px;}
+.msg-main-status{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--mut);}
+.msg-main-status.online{color:var(--g);}
+.msg-body{flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:.65rem;
+  scrollbar-width:thin;scrollbar-color:var(--brd) transparent;}
+.msg-bubble{max-width:72%;display:flex;flex-direction:column;gap:.15rem;}
+.msg-bubble.mine{align-self:flex-end;align-items:flex-end;}
+.msg-bubble.theirs{align-self:flex-start;}
+.bubble-text{
+  padding:.55rem .85rem;border-radius:6px;
+  font-family:'Barlow Condensed',sans-serif;font-size:.9rem;line-height:1.4;
+}
+.msg-bubble.mine .bubble-text{background:rgba(0,255,70,.12);border:1px solid rgba(0,255,70,.25);color:var(--txt);}
+.msg-bubble.theirs .bubble-text{background:var(--c2);border:1px solid var(--brd);color:var(--txt);}
+.bubble-time{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--mut);padding:0 .25rem;}
+.msg-footer{padding:.75rem 1.25rem;border-top:1px solid var(--brd);display:flex;gap:.75rem;}
+.msg-input{flex:1;background:rgba(0,255,70,.04);border:1px solid var(--brd);border-radius:4px;
+  padding:.55rem .85rem;color:var(--txt);font-family:'Barlow Condensed',sans-serif;font-size:.88rem;outline:none;
+  transition:border-color .2s;}
+.msg-input:focus{border-color:var(--g);}
+.msg-input::placeholder{color:var(--mut);}
+.no-convo{flex:1;display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-size:.82rem;color:var(--mut);letter-spacing:2px;text-transform:uppercase;}
+
+/* ─── FORMS ───────────────────────────────────────────────── */
+.form-group{margin-bottom:1rem;}
+.form-label{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;
+  color:var(--mut);margin-bottom:.35rem;display:block;}
+.form-input,.form-textarea,.form-select{
+  width:100%;background:rgba(0,255,70,.03);border:1px solid var(--brd);
+  border-radius:4px;padding:.6rem .85rem;color:var(--txt);
+  font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;
+}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--g);}
+.form-input::placeholder{color:var(--mut);}
+.form-textarea{resize:vertical;min-height:90px;line-height:1.5;}
+.form-select{cursor:pointer;appearance:none;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+
+/* ─── BUTTONS ─────────────────────────────────────────────── */
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:2px;text-transform:uppercase;
+  padding:7px 18px;border-radius:3px;cursor:pointer;transition:all .2s;border:1px solid;}
+.btn-g{background:var(--g);color:#000;border-color:var(--g);font-weight:700;}
+.btn-g:hover{opacity:.85;box-shadow:0 0 20px rgba(0,255,70,.35);}
+.btn-r{background:transparent;color:var(--r);border-color:rgba(255,62,108,.35);}
+.btn-r:hover{background:rgba(255,62,108,.1);}
+.btn-y{background:transparent;color:var(--y);border-color:rgba(255,230,0,.35);}
+.btn-y:hover{background:rgba(255,230,0,.1);}
+.btn-d{background:transparent;color:var(--mut);border-color:var(--brd);}
+.btn-d:hover{color:var(--txt);border-color:rgba(255,255,255,.2);}
+.btn-sm{padding:4px 11px;font-size:.68rem;}
+
+/* ─── TAGS ────────────────────────────────────────────────── */
+.tag{display:inline-block;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid;}
+.tag.g{color:var(--g);border-color:rgba(0,255,70,.3);background:rgba(0,255,70,.07);}
+.tag.r{color:var(--r);border-color:rgba(255,62,108,.3);background:rgba(255,62,108,.07);}
+.tag.y{color:var(--y);border-color:rgba(255,230,0,.3);background:rgba(255,230,0,.07);}
+.tag.b{color:var(--b);border-color:rgba(74,158,255,.3);background:rgba(74,158,255,.07);}
+
+/* ─── TABLES ──────────────────────────────────────────────── */
+.vtable{width:100%;border-collapse:collapse;}
+.vtable th{font-family:'Barlow Condensed',sans-serif;font-size:.67rem;letter-spacing:2px;text-transform:uppercase;
+  color:var(--mut);padding:.5rem .75rem;text-align:left;border-bottom:1px solid var(--brd);}
+.vtable td{font-family:'Barlow Condensed',sans-serif;font-size:.84rem;padding:.6rem .75rem;
+  border-bottom:1px solid rgba(0,255,70,.04);color:var(--txt);vertical-align:middle;}
+.vtable tr:hover td{background:rgba(0,255,70,.025);}
+.vtable tr:last-child td{border-bottom:none;}
+
+/* ─── ADMIN SPECIFIC ──────────────────────────────────────── */
+.admin-crown{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;
+  color:#000;background:var(--r);padding:3px 10px;border-radius:2px;
+}
+.action-log-row{display:flex;align-items:flex-start;gap:.65rem;padding:.5rem 0;border-bottom:1px solid rgba(0,255,70,.04);}
+.action-log-row:last-child{border-bottom:none;}
+.log-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.log-dot.g{background:var(--g);box-shadow:0 0 5px rgba(0,255,70,.5);}
+.log-dot.r{background:var(--r);}
+.log-dot.y{background:var(--y);}
+.log-text{font-family:'Barlow Condensed',sans-serif;font-size:.83rem;color:var(--txt);flex:1;}
+.log-time{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:var(--mut);white-space:nowrap;}
+
+/* ─── PATCH NOTE PREVIEW ──────────────────────────────────── */
+.pn-preview{background:rgba(0,255,70,.025);border:1px solid var(--brd);border-radius:4px;padding:1rem;margin-top:.85rem;}
+.pn-preview-title{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:3px;color:#fff;margin:.3rem 0;}
+.pn-preview-body{font-size:.84rem;color:var(--txt);line-height:1.6;white-space:pre-wrap;}
+.pn-preview-date{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:var(--mut);margin-top:.5rem;}
+
+/* ─── TOAST ───────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:2rem;right:2rem;z-index:9999;
+  background:var(--card);border:1px solid var(--g);border-radius:5px;
+  padding:.7rem 1.2rem;font-family:'Barlow Condensed',sans-serif;
+  font-size:.83rem;letter-spacing:1px;color:var(--g);
+  box-shadow:0 0 20px rgba(0,255,70,.2);opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s;transform:translateY(8px);
+}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* ─── EMPTY STATES ────────────────────────────────────────── */
+.empty{color:var(--mut);font-family:'Barlow Condensed',sans-serif;font-size:.83rem;
+  letter-spacing:1px;text-align:center;padding:2rem 0;text-transform:uppercase;}
+
+/* ─── ONLINE STATUS BANNER ────────────────────────────────── */
+.status-banner{
+  display:flex;align-items:center;gap:.65rem;
+  background:rgba(0,255,70,.04);border:1px solid rgba(0,255,70,.15);border-radius:5px;
+  padding:.75rem 1rem;margin-bottom:1.25rem;
+}
+.status-dot-live{width:9px;height:9px;border-radius:50%;background:var(--g);
+  box-shadow:0 0 8px var(--g);animation:pulse-dot 2s ease-in-out infinite;}
+.status-banner-text{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;color:var(--txt);letter-spacing:1px;}
+.status-banner-sub{font-family:'Share Tech Mono',monospace;font-size:.67rem;color:var(--mut);margin-left:auto;}
+
+/* ─── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:900px){
+  .grid2,.grid3,.grid4{grid-template-columns:1fr;}
+  .msg-layout{grid-template-columns:1fr;height:auto;}
+  .msg-sidebar{max-height:200px;}
+  nav{padding:0 1rem;gap:.5rem;}
+  .nav-tab span:not(.ntab-badge){display:none;}
+  .page{padding:1rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="loader-logo">VOIDRUN</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- ACCESS DENIED -->
+<div id="accessDenied">
+  <div style="font-size:2.5rem">🚫</div>
+  <div class="ad-title">Access Denied</div>
+  <div class="ad-sub">You need to be logged in to view the dashboard</div>
+  <div class="ad-uid" id="adUidShow"></div>
+  <a class="ad-back" href="index.html">← Back to Home</a>
+</div>
+
+<!-- APP BODY -->
+<div id="appBody">
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">VOID<span style="color:#fff">RUN</span></a>
+    <div class="nav-sep"></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPage('overview')" id="tab-overview">
+        <span>📊</span><span>Overview</span>
+      </button>
+      <button class="nav-tab" onclick="showPage('friends')" id="tab-friends">
+        <span>👥</span><span>Friends</span>
+        <span class="ntab-badge" id="friends-badge" style="display:none">0</span>
+      </button>
+      <button class="nav-tab" onclick="showPage('challenges')" id="tab-challenges">
+        <span>⚡</span><span>Challenges</span>
+        <span class="ntab-badge" id="chal-badge" style="display:none">0</span>
+      </button>
+      <button class="nav-tab" onclick="showPage('messages')" id="tab-messages">
+        <span>💬</span><span>Messages</span>
+        <span class="ntab-badge" id="msg-badge" style="display:none">0</span>
+      </button>
+      <button class="nav-tab" onclick="showPage('contact')" id="tab-contact">
+        <span>📩</span><span>Contact</span>
+      </button>
+      <button class="nav-tab admin-only" onclick="showPage('admin')" id="tab-admin" style="display:none">
+        <span>👑</span><span>Admin</span>
+      </button>
+    </div>
+    <div class="nav-right">
+      <div class="nav-avatar" id="navAvatar">?</div>
+      <div class="nav-user-info">
+        <div class="nav-username" id="navUsername">—</div>
+        <div class="nav-role" id="navRole">Player</div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- ══ OVERVIEW ═════════════════════════════════════════════ -->
+  <div class="page active" id="page-overview">
+    <div class="pg-head">
+      <div class="pg-title">Dashboard</div>
+      <div class="pg-sub" id="ov-greeting">Welcome back</div>
+    </div>
+
+    <div class="status-banner">
+      <div class="status-dot-live"></div>
+      <span class="status-banner-text" id="ov-status-text">You are online</span>
+      <span class="status-banner-sub" id="ov-session-time">Session started just now</span>
+    </div>
+
+    <div class="grid4" style="margin-bottom:1.25rem">
+      <div class="stat-chip g">
+        <div class="stat-val" id="ov-friends-count">—</div>
+        <div class="stat-lbl">Friends</div>
+      </div>
+      <div class="stat-chip b">
+        <div class="stat-val" id="ov-online-count">—</div>
+        <div class="stat-lbl">Online Now</div>
+      </div>
+      <div class="stat-chip y">
+        <div class="stat-val" id="ov-chal-count">—</div>
+        <div class="stat-lbl">Active Challenges</div>
+      </div>
+      <div class="stat-chip r">
+        <div class="stat-val" id="ov-req-count">—</div>
+        <div class="stat-lbl">Friend Requests</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="sc">
+        <div class="sc-title">Friends Online <span class="badge" id="ov-online-badge">0</span></div>
+        <div id="ov-friends-list" class="friends-grid"></div>
+      </div>
+      <div class="sc">
+        <div class="sc-title">Recent Activity</div>
+        <div id="ov-activity"></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="sc">
+        <div class="sc-title">Season Countdown</div>
+        <div id="ov-season-name" style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:var(--mut);letter-spacing:2px;text-transform:uppercase;margin-bottom:.75rem;"></div>
+        <div style="display:flex;gap:.6rem;" id="ov-countdown">
+          <div class="stat-chip g" style="flex:1;text-align:center;">
+            <div class="stat-val" id="cd-d">00</div><div class="stat-lbl">Days</div>
+          </div>
+          <div class="stat-chip g" style="flex:1;text-align:center;">
+            <div class="stat-val" id="cd-h">00</div><div class="stat-lbl">Hrs</div>
+          </div>
+          <div class="stat-chip g" style="flex:1;text-align:center;">
+            <div class="stat-val" id="cd-m">00</div><div class="stat-lbl">Min</div>
+          </div>
+          <div class="stat-chip g" style="flex:1;text-align:center;">
+            <div class="stat-val" id="cd-s">00</div><div class="stat-lbl">Sec</div>
+          </div>
+        </div>
+      </div>
+      <div class="sc">
+        <div class="sc-title">Active Challenges</div>
+        <div id="ov-challenges"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FRIENDS ══════════════════════════════════════════════ -->
+  <div class="page" id="page-friends">
+    <div class="pg-head">
+      <div class="pg-title">Friends</div>
+      <div class="pg-sub">Your crew in the void</div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <!-- Requests -->
+        <div class="sc">
+          <div class="sc-title">Friend Requests <span class="badge red" id="req-badge">0</span></div>
+          <div id="friend-requests"><div class="empty">No pending requests</div></div>
+        </div>
+        <!-- Add friend -->
+        <div class="sc">
+          <div class="sc-title">Add Friend</div>
+          <div class="form-group">
+            <label class="form-label">Friend Code or Username</label>
+            <div style="display:flex;gap:.65rem;">
+              <input class="form-input" id="addFriendInput" placeholder="e.g. VOID-4821 or username"/>
+              <button class="btn btn-g" onclick="sendFriendRequest()">Add</button>
+            </div>
+          </div>
+          <div id="addFriendMsg" style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;margin-top:.5rem;"></div>
+        </div>
+      </div>
+      <div>
+        <!-- Friend list -->
+        <div class="sc">
+          <div class="sc-title">All Friends <span class="badge" id="all-friends-badge">0</span></div>
+          <div style="margin-bottom:.85rem;">
+            <input class="form-input" id="friendSearch" placeholder="Search friends..." oninput="filterFriends()"/>
+          </div>
+          <div id="friends-list" class="friends-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHALLENGES ═══════════════════════════════════════════ -->
+  <div class="page" id="page-challenges">
+    <div class="pg-head">
+      <div class="pg-title">Challenges</div>
+      <div class="pg-sub">From your friends — answer the call</div>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="sc">
+          <div class="sc-title">Incoming <span class="badge red" id="incoming-chal-badge">0</span></div>
+          <div id="incoming-challenges"></div>
+        </div>
+      </div>
+      <div>
+        <div class="sc">
+          <div class="sc-title">Send Challenge</div>
+          <div class="form-group">
+            <label class="form-label">To (username)</label>
+            <input class="form-input" id="chalTo" placeholder="Friend's username"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Challenge Type</label>
+            <select class="form-select form-input" id="chalType">
+              <option value="beat_score">Beat My Best Score</option>
+              <option value="beat_level">Beat Me to a Level</option>
+              <option value="no_death">No-Death Run</option>
+              <option value="time_trial">Time Trial</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <input class="form-input" id="chalMsg" placeholder="e.g. Beat my time on Level 31 — 1:03.44"/>
+          </div>
+          <button class="btn btn-g" onclick="sendChallenge()">⚡ Send Challenge</button>
+        </div>
+        <div class="sc">
+          <div class="sc-title">Sent Challenges</div>
+          <div id="sent-challenges"><div class="empty">No challenges sent</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MESSAGES ═════════════════════════════════════════════ -->
+  <div class="page" id="page-messages">
+    <div class="pg-head">
+      <div class="pg-title">Messages</div>
+      <div class="pg-sub">Direct messages with friends</div>
+    </div>
+    <div class="sc" style="padding:0;overflow:hidden;">
+      <div class="msg-layout">
+        <div class="msg-sidebar">
+          <div class="msg-sidebar-head">Conversations</div>
+          <div id="msg-contacts"></div>
+        </div>
+        <div class="msg-main" id="msg-main">
+          <div class="no-convo">Select a conversation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONTACT ═══════════════════════════════════════════════ -->
+  <div class="page" id="page-contact">
+    <div class="pg-head">
+      <div class="pg-title">Contact</div>
+      <div class="pg-sub">Report a bug, ask for help, or reach the dev</div>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="sc">
+          <div class="sc-title">Send a Message</div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select form-input" id="ctCategory">
+              <option value="bug">🐛 Bug Report</option>
+              <option value="suggestion">💡 Suggestion</option>
+              <option value="account">🔒 Account Issue</option>
+              <option value="other">📩 Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <input class="form-input" id="ctSubject" placeholder="Brief description..."/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-textarea" id="ctBody" placeholder="Describe your issue or idea in detail..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select class="form-select form-input" id="ctPriority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High — Game Breaking</option>
+            </select>
+          </div>
+          <button class="btn btn-g" onclick="submitContact()">📩 Submit</button>
+        </div>
+      </div>
+      <div>
+        <div class="sc">
+          <div class="sc-title">Your Previous Reports</div>
+          <div id="my-reports"></div>
+        </div>
+        <div class="sc" style="background:rgba(0,255,70,.025);">
+          <div class="sc-title">Info</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.84rem;color:var(--mut2);line-height:1.8;">
+            <div>📧 &nbsp;voidrun48@gmail.com</div>
+            <div style="margin-top:.5rem;">⏱ &nbsp;Typical response: <span style="color:var(--g)">1–48 hours</span></div>
+            <div style="margin-top:.5rem;">🎮 &nbsp;Built by one dev — thanks for the patience</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN ═════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin">
+    <div class="pg-head">
+      <div class="pg-title" style="display:flex;align-items:center;gap:.75rem;">
+        Admin Panel
+        <span class="admin-crown">👑 Owner</span>
+      </div>
+      <div class="pg-sub">voidrun48@gmail.com — Restricted Access</div>
+    </div>
+
+    <!-- Admin stat overview -->
+    <div class="grid4" style="margin-bottom:1.25rem;">
+      <div class="stat-chip g"><div class="stat-val" id="adm-total-players">—</div><div class="stat-lbl">Total Players</div></div>
+      <div class="stat-chip b"><div class="stat-val" id="adm-total-games">—</div><div class="stat-lbl">Total Games</div></div>
+      <div class="stat-chip y"><div class="stat-val" id="adm-top-score">—</div><div class="stat-lbl">Top Score</div></div>
+      <div class="stat-chip r"><div class="stat-val" id="adm-reports">—</div><div class="stat-lbl">Open Reports</div></div>
+    </div>
+
+    <div class="grid2">
+      <!-- Player Management -->
+      <div>
+        <div class="sc">
+          <div class="sc-title">Player Management</div>
+          <div style="display:flex;gap:.65rem;margin-bottom:.85rem;">
+            <input class="form-input" id="admPlayerSearch" placeholder="Search player..." oninput="admSearchPlayers()"/>
+            <button class="btn btn-d btn-sm" onclick="admLoadPlayers()">↻</button>
+          </div>
+          <table class="vtable">
+            <thead><tr><th>Player</th><th>Games</th><th>Score</th><th>Actions</th></tr></thead>
+            <tbody id="adm-players-table"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+
+        <!-- Maintenance -->
+        <div class="sc red">
+          <div class="sc-title">Danger Zone</div>
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:.85rem;">
+            <button class="btn btn-r" id="maintenanceBtn" onclick="toggleMaintenance()">Enable Maintenance Mode</button>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;color:var(--mut);" id="maintenanceStatus">Currently: OFF</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Broadcast Alert to All Players</label>
+            <div style="display:flex;gap:.65rem;">
+              <input class="form-input" id="broadcastMsg" placeholder="e.g. Server going down in 10 mins..."/>
+              <button class="btn btn-r" onclick="broadcastAlert()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <!-- Patch Notes -->
+        <div class="sc">
+          <div class="sc-title">Post Patch Note</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Version</label>
+              <input class="form-input" id="pnVersion" placeholder="e.g. v1.4.2"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <select class="form-select form-input" id="pnType">
+                <option value="update">Update</option>
+                <option value="hotfix">Hotfix</option>
+                <option value="new">New Content</option>
+                <option value="balance">Balance</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input class="form-input" id="pnTitle" placeholder="e.g. The Dark Zone Expansion"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Content</label>
+            <textarea class="form-textarea" id="pnBody" placeholder="• Added 22 new levels&#10;• Fixed score saving bug"></textarea>
+          </div>
+          <div class="pn-preview">
+            <span class="tag g" id="pnPreviewTag">UPDATE</span>
+            <div class="pn-preview-title" id="pnPreviewTitle">Title Preview</div>
+            <div class="pn-preview-body" id="pnPreviewBody">Content will appear here...</div>
+            <div class="pn-preview-date" id="pnPreviewDate"></div>
+          </div>
+          <div style="display:flex;gap:.65rem;margin-top:.85rem;">
+            <button class="btn btn-g" onclick="postPatchNote()">📋 Post</button>
+            <button class="btn btn-d" onclick="clearPatchForm()">Clear</button>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="sc">
+          <div class="sc-title">Season Settings</div>
+          <div class="form-group">
+            <label class="form-label">Season Name</label>
+            <input class="form-input" id="seasonName" placeholder="e.g. Season 2: The Dark Age"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Season End Date</label>
+            <input class="form-input" id="seasonEnd" type="date"/>
+          </div>
+          <button class="btn btn-g" onclick="saveSettings()">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Reports -->
+    <div class="sc">
+      <div class="sc-title">All Contact Reports <span class="badge red" id="adm-reports-badge">0</span></div>
+      <div id="adm-reports-list"><div class="empty">No reports</div></div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="sc">
+      <div class="sc-title">Admin Activity Log</div>
+      <div id="adm-log"></div>
+    </div>
+  </div>
+
+</div><!-- /appBody -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════════
+const ADMIN_EMAIL = 'voidrun48@gmail.com';
+const ADMIN_UIDS  = ['qBxTQllbhDVgGhahwDrJvmFXj1E2'];
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyCD0gVXr7dDnKuIpqXjVet2vvI09ryPGvU",
+  authDomain:        "voidruninc.firebaseapp.com",
+  projectId:         "voidruninc",
+  storageBucket:     "voidruninc.firebasestorage.app",
+  messagingSenderId: "832807736710",
+  appId:             "1:832807736710:web:fdfba2332c3aa274fc8807"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db   = firebase.firestore();
+const auth = firebase.auth();
+
+// ── State ─────────────────────────────────────────────────────
+let currentUser   = null;
+let isAdmin       = false;
+let allPlayers    = [];
+let friendsList   = [];
+let pendingReqs   = [];
+let conversations = {};
+let activeConvoUid = null;
+let sessionStart  = Date.now();
+let activityLog   = JSON.parse(localStorage.getItem('vr_dash_log') || '[]');
+
+// ── Helpers ───────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const pad = n => String(n ?? 0).padStart(2, '0');
+
+function showToast(msg, color = 'var(--g)') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.borderColor = color;
+  t.style.color = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function timeAgo(ts) {
+  if (!ts) return 'Never';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const diff = Date.now() - d.getTime();
+  if (diff < 60000)   return 'Just now';
+  if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+  if (diff < 86400000)return Math.floor(diff/3600000) + 'h ago';
+  return Math.floor(diff/86400000) + 'd ago';
+}
+
+function isOnline(ts) {
+  if (!ts) return false;
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return Date.now() - d.getTime() < 300000; // 5 min
+}
+
+function isRecent(ts) {
+  if (!ts) return false;
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return Date.now() - d.getTime() < 3600000; // 1 hr
+}
+
+function avatarLetter(name) {
+  return (name || '?').charAt(0).toUpperCase();
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  $('page-' + name).classList.add('active');
+  $('tab-' + name).classList.add('active');
+
+  if (name === 'friends')    loadFriendsPage();
+  if (name === 'challenges') loadChallengesPage();
+  if (name === 'messages')   loadMessagesPage();
+  if (name === 'contact')    loadMyReports();
+  if (name === 'admin' && isAdmin) loadAdminPage();
+}
+
+// ── Session timer ─────────────────────────────────────────────
+setInterval(() => {
+  const diff = Date.now() - sessionStart;
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  const txt = h > 0 ? `Session: ${h}h ${pad(m)}m` : `Session: ${pad(m)}m ${pad(s)}s`;
+  const el = $('ov-session-time');
+  if (el) el.textContent = txt;
+}, 1000);
+
+// ── Countdown ─────────────────────────────────────────────────
+let seasonEndDate = new Date('2026-04-01T00:00:00Z').getTime();
+function tickCountdown() {
+  const diff = seasonEndDate - Date.now();
+  if (diff <= 0) { ['d','h','m','s'].forEach(k => { const el = $('cd-'+k); if(el) el.textContent='00'; }); return; }
+  const el_d=$('cd-d'), el_h=$('cd-h'), el_m=$('cd-m'), el_s=$('cd-s');
+  if(el_d) el_d.textContent = pad(Math.floor(diff / 86400000));
+  if(el_h) el_h.textContent = pad(Math.floor((diff % 86400000) / 3600000));
+  if(el_m) el_m.textContent = pad(Math.floor((diff % 3600000) / 60000));
+  if(el_s) el_s.textContent = pad(Math.floor((diff % 60000) / 1000));
+}
+tickCountdown();
+setInterval(tickCountdown, 1000);
+
+// ══════════════════════════════════════════════════════════════
+//  OVERVIEW PAGE
+// ══════════════════════════════════════════════════════════════
+async function loadOverview() {
+  try {
+    // Greeting
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+    const el = $('ov-greeting');
+    if (el) el.textContent = `${greet}, ${currentUser.displayName || 'Void Runner'}`;
+
+    // Load season config
+    const cfg = await db.collection('config').doc('global').get();
+    if (cfg.exists) {
+      const data = cfg.data();
+      if (data.seasonEnd) seasonEndDate = new Date(data.seasonEnd + 'T00:00:00Z').getTime();
+      const snEl = $('ov-season-name');
+      if (snEl) snEl.textContent = data.seasonName || 'Season II';
+    }
+
+    // Load my friends
+    await loadFriendsData();
+
+    const online = friendsList.filter(f => isOnline(f.lastSeen));
+    const recent = friendsList.filter(f => !isOnline(f.lastSeen) && isRecent(f.lastSeen));
+
+    if ($('ov-friends-count')) $('ov-friends-count').textContent = friendsList.length;
+    if ($('ov-online-count'))  $('ov-online-count').textContent  = online.length;
+    if ($('ov-online-badge'))  $('ov-online-badge').textContent  = online.length;
+
+    // Load challenges
+    await loadChallengesData();
+    const incoming = conversations['__challenges__'] || [];
+
+    // Render friends list on overview
+    const ovfl = $('ov-friends-list');
+    if (ovfl) {
+      const show = [...online, ...recent, ...friendsList.filter(f => !isOnline(f.lastSeen) && !isRecent(f.lastSeen))].slice(0, 6);
+      ovfl.innerHTML = show.length ? show.map(renderFriendRow).join('') : '<div class="empty">No friends added yet</div>';
+    }
+
+    // Load challenges for overview
+    await loadChallengesForOverview();
+
+    // Activity feed
+    renderActivityFeed();
+  } catch(e) { console.error(e); }
+}
+
+function renderFriendRow(f) {
+  const on = isOnline(f.lastSeen);
+  const re = isRecent(f.lastSeen);
+  const cls = on ? 'online' : re ? 'recent' : '';
+  const statusText = on ? '<span class="friend-status online">● ONLINE</span>' : re ? '<span class="friend-status recent">◑ RECENTLY ACTIVE</span>' : '<span class="friend-status">○ OFFLINE</span>';
+  return `<div class="friend-row ${cls}">
+    <div class="friend-avatar">
+      <span class="av-initial">${avatarLetter(f.displayName)}</span>
+      ${on ? '<div class="online-dot"></div>' : ''}
+    </div>
+    <div class="friend-info">
+      <div class="friend-name">${f.displayName || 'Anonymous'}</div>
+      <div class="friend-status-row">${statusText}<span class="friend-last">${timeAgo(f.lastSeen)}</span></div>
+    </div>
+    <div class="friend-meta">
+      <div class="friend-score">${(f.bestScore || 0).toLocaleString()}</div>
+      <div class="friend-lv">${f.friendCode || '—'}</div>
+    </div>
+  </div>`;
+}
+
+function renderActivityFeed() {
+  const el = $('ov-activity');
+  if (!el) return;
+  if (!activityLog.length) {
+    el.innerHTML = '<div class="empty">No activity yet</div>';
+    return;
+  }
+  el.innerHTML = activityLog.slice(0, 8).map(l => {
+    const d = new Date(l.time);
+    const t = d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return `<div class="action-log-row">
+      <div class="log-dot ${l.type}"></div>
+      <div class="log-text">${l.text}</div>
+      <div class="log-time">${t}</div>
+    </div>`;
+  }).join('');
+}
+
+function logActivity(text, type = 'g') {
+  activityLog.unshift({ text, type, time: new Date().toISOString() });
+  if (activityLog.length > 60) activityLog = activityLog.slice(0, 60);
+  localStorage.setItem('vr_dash_log', JSON.stringify(activityLog));
+  renderActivityFeed();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FRIENDS
+// ══════════════════════════════════════════════════════════════
+async function loadFriendsData() {
+  if (!currentUser) return;
+  try {
+    const myDoc = await db.collection('users').doc(currentUser.uid).get();
+    const myData = myDoc.exists ? myDoc.data() : {};
+    const friendUids = myData.friends || [];
+    pendingReqs = myData.friendRequests || [];
+
+    // Update badges
+    const reqBadge = pendingReqs.length;
+    $('friends-badge').textContent = reqBadge;
+    $('friends-badge').style.display = reqBadge > 0 ? 'inline-block' : 'none';
+    if ($('ov-req-count')) $('ov-req-count').textContent = reqBadge;
+    if ($('req-badge')) $('req-badge').textContent = reqBadge;
+
+    if (!friendUids.length) { friendsList = []; return; }
+
+    const chunks = [];
+    for (let i = 0; i < friendUids.length; i += 10) chunks.push(friendUids.slice(i, i+10));
+    friendsList = [];
+    for (const chunk of chunks) {
+      const snap = await db.collection('users').where(firebase.firestore.FieldPath.documentId(), 'in', chunk).get();
+      snap.docs.forEach(d => friendsList.push({ id: d.id, ...d.data() }));
+    }
+    if ($('all-friends-badge')) $('all-friends-badge').textContent = friendsList.length;
+  } catch(e) { console.error('loadFriendsData', e); }
+}
+
+async function loadFriendsPage() {
+  await loadFriendsData();
+
+  // Render pending requests
+  const reqEl = $('friend-requests');
+  if (pendingReqs.length) {
+    // Fetch their names
+    const names = {};
+    for (const uid of pendingReqs.slice(0, 10)) {
+      const d = await db.collection('users').doc(uid).get();
+      if (d.exists) names[uid] = d.data();
+    }
+    reqEl.innerHTML = pendingReqs.map(uid => {
+      const u = names[uid] || {};
+      return `<div class="req-card">
+        <div class="req-avatar">${avatarLetter(u.displayName)}</div>
+        <div><div class="req-name">${u.displayName || 'Unknown'}</div><div class="req-code">${u.friendCode || uid.slice(0,8)}</div></div>
+        <div class="req-btns">
+          <button class="btn btn-g btn-sm" onclick="acceptFriend('${uid}','${(u.displayName||'').replace(/'/g,"\\'")}')">✓ Accept</button>
+          <button class="btn btn-r btn-sm" onclick="declineFriend('${uid}')">✕ Decline</button>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    reqEl.innerHTML = '<div class="empty">No pending requests</div>';
+  }
+
+  // Render full friends list
+  renderFriendsListPage();
+}
+
+function renderFriendsListPage() {
+  const el = $('friends-list');
+  if (!el) return;
+  const q = ($('friendSearch')?.value || '').toLowerCase();
+  const list = q ? friendsList.filter(f => (f.displayName||'').toLowerCase().includes(q) || (f.friendCode||'').toLowerCase().includes(q)) : friendsList;
+
+  if (!list.length) { el.innerHTML = '<div class="empty">No friends found</div>'; return; }
+
+  const sorted = [...list].sort((a, b) => {
+    const ao = isOnline(a.lastSeen) ? 2 : isRecent(a.lastSeen) ? 1 : 0;
+    const bo = isOnline(b.lastSeen) ? 2 : isRecent(b.lastSeen) ? 1 : 0;
+    return bo - ao;
+  });
+
+  el.innerHTML = sorted.map(f => {
+    const on = isOnline(f.lastSeen);
+    const re = isRecent(f.lastSeen);
+    const cls = on ? 'online' : re ? 'recent' : '';
+    const statusText = on ? '<span class="friend-status online">● ONLINE</span>' : re ? '<span class="friend-status recent">◑ RECENTLY ACTIVE</span>' : '<span class="friend-status">○ OFFLINE</span>';
+    return `<div class="friend-row ${cls}">
+      <div class="friend-avatar">
+        <span class="av-initial">${avatarLetter(f.displayName)}</span>
+        ${on ? '<div class="online-dot"></div>' : ''}
+      </div>
+      <div class="friend-info">
+        <div class="friend-name">${f.displayName || 'Anonymous'}</div>
+        <div class="friend-status-row">${statusText}<span class="friend-last">${timeAgo(f.lastSeen)}</span></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--mut);margin-top:2px;">${f.friendCode || '—'}</div>
+      </div>
+      <div class="friend-meta">
+        <div class="friend-score">${(f.bestScore || 0).toLocaleString()}</div>
+        <div class="friend-lv" style="font-size:.6rem;">${f.gamesPlayed || 0} games</div>
+        <div class="friend-actions" style="margin-top:.35rem;">
+          <button class="btn btn-d btn-sm" onclick="openMsgWith('${f.id}','${(f.displayName||'').replace(/'/g,"\\'")}')">💬</button>
+          <button class="btn btn-y btn-sm" onclick="quickChallenge('${(f.displayName||'').replace(/'/g,"\\'")}')">⚡</button>
+          <button class="btn btn-r btn-sm" onclick="removeFriend('${f.id}','${(f.displayName||'').replace(/'/g,"\\'")}')">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterFriends() { renderFriendsListPage(); }
+
+async function sendFriendRequest() {
+  const val = $('addFriendInput').value.trim();
+  const msgEl = $('addFriendMsg');
+  if (!val) return;
+
+  msgEl.style.color = 'var(--mut)';
+  msgEl.textContent = 'Searching...';
+
+  try {
+    let snap = await db.collection('users').where('friendCode', '==', val.toUpperCase()).limit(1).get();
+    if (snap.empty) snap = await db.collection('users').where('displayName', '==', val).limit(1).get();
+    if (snap.empty) { msgEl.style.color='var(--r)'; msgEl.textContent='Player not found'; return; }
+
+    const target = snap.docs[0];
+    if (target.id === currentUser.uid) { msgEl.style.color='var(--r)'; msgEl.textContent="That's you!"; return; }
+
+    const tData = target.data();
+    const existingReqs = tData.friendRequests || [];
+    if (existingReqs.includes(currentUser.uid)) { msgEl.style.color='var(--y)'; msgEl.textContent='Request already sent'; return; }
+    if ((tData.friends||[]).includes(currentUser.uid)) { msgEl.style.color='var(--y)'; msgEl.textContent='Already friends!'; return; }
+
+    await db.collection('users').doc(target.id).update({
+      friendRequests: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+    });
+
+    msgEl.style.color = 'var(--g)';
+    msgEl.textContent = `✓ Request sent to ${tData.displayName || val}`;
+    $('addFriendInput').value = '';
+    logActivity(`Sent friend request to ${tData.displayName || val}`, 'g');
+    showToast('Friend request sent!');
+  } catch(e) { msgEl.style.color='var(--r)'; msgEl.textContent='Error: ' + e.message; }
+}
+
+async function acceptFriend(uid, name) {
+  await db.collection('users').doc(currentUser.uid).update({
+    friends: firebase.firestore.FieldValue.arrayUnion(uid),
+    friendRequests: firebase.firestore.FieldValue.arrayRemove(uid)
+  });
+  await db.collection('users').doc(uid).update({
+    friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+  });
+  logActivity(`Accepted friend request from ${name || uid}`, 'g');
+  showToast(`✓ Now friends with ${name || uid}`);
+  loadFriendsPage();
+  loadOverview();
+}
+
+async function declineFriend(uid) {
+  await db.collection('users').doc(currentUser.uid).update({
+    friendRequests: firebase.firestore.FieldValue.arrayRemove(uid)
+  });
+  loadFriendsPage();
+}
+
+async function removeFriend(uid, name) {
+  if (!confirm(`Remove ${name} from friends?`)) return;
+  await db.collection('users').doc(currentUser.uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(uid) });
+  await db.collection('users').doc(uid).update({ friends: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) });
+  logActivity(`Removed ${name} from friends`, 'r');
+  showToast(`Removed ${name}`, 'var(--r)');
+  loadFriendsPage();
+  loadOverview();
+}
+
+function quickChallenge(name) {
+  $('chalTo').value = name;
+  showPage('challenges');
+}
+
+function openMsgWith(uid, name) {
+  activeConvoUid = uid;
+  showPage('messages');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CHALLENGES
+// ══════════════════════════════════════════════════════════════
+async function loadChallengesData() {
+  if (!currentUser) return;
+  try {
+    const snap = await db.collection('challenges')
+      .where('toUid', '==', currentUser.uid)
+      .orderBy('date', 'desc').limit(20).get();
+    conversations['__challenges__'] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    const unread = conversations['__challenges__'].filter(c => !c.read).length;
+    $('chal-badge').textContent = unread;
+    $('chal-badge').style.display = unread > 0 ? 'inline-block' : 'none';
+    if ($('ov-chal-count')) $('ov-chal-count').textContent = conversations['__challenges__'].length;
+  } catch(e) { /* collection may not exist yet */ }
+}
+
+async function loadChallengesForOverview() {
+  await loadChallengesData();
+  const ovChal = $('ov-challenges');
+  if (!ovChal) return;
+  const list = (conversations['__challenges__'] || []).slice(0, 4);
+  if (!list.length) { ovChal.innerHTML = '<div class="empty">No active challenges</div>'; return; }
+  ovChal.innerHTML = list.map(renderChalCard).join('');
+}
+
+async function loadChallengesPage() {
+  await loadChallengesData();
+  const el = $('incoming-challenges');
+  const list = conversations['__challenges__'] || [];
+  if ($('incoming-chal-badge')) $('incoming-chal-badge').textContent = list.filter(c=>!c.read).length;
+  el.innerHTML = list.length ? list.map(c => `
+    <div class="chal-card ${c.read?'':'unread'}" onclick="markChalRead('${c.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span class="chal-from">${c.from || 'Unknown'}</span>
+        <button class="btn btn-r btn-sm" style="padding:2px 8px;font-size:.62rem;" onclick="event.stopPropagation();dismissChal('${c.id}')">✕</button>
+      </div>
+      <div class="chal-msg">${c.msg || ''}</div>
+      <div class="chal-time">${timeAgo(c.date)} ${!c.read ? '<span class="unread-pip"></span>' : ''}</div>
+    </div>`).join('') : '<div class="empty">No incoming challenges</div>';
+
+  // Sent challenges
+  try {
+    const sentSnap = await db.collection('challenges').where('fromUid','==',currentUser.uid).orderBy('date','desc').limit(10).get();
+    const sentEl = $('sent-challenges');
+    if (!sentSnap.size) { sentEl.innerHTML = '<div class="empty">No challenges sent</div>'; return; }
+    sentEl.innerHTML = sentSnap.docs.map(d => {
+      const c = d.data();
+      return `<div class="chal-card">
+        <div class="chal-from" style="color:var(--b);">→ ${c.to || '?'}</div>
+        <div class="chal-msg">${c.msg || ''}</div>
+        <div class="chal-time">${timeAgo(c.date)}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+function renderChalCard(c) {
+  return `<div class="chal-card ${c.read?'':'unread'}" onclick="markChalRead('${c.id}')">
+    <span class="chal-from">${c.from || 'Unknown'}</span>
+    <div class="chal-msg">${c.msg || ''}</div>
+    <div class="chal-time">${timeAgo(c.date)}</div>
+  </div>`;
+}
+
+async function markChalRead(id) {
+  await db.collection('challenges').doc(id).update({ read: true });
+  loadChallengesData();
+  loadChallengesPage();
+}
+
+async function dismissChal(id) {
+  await db.collection('challenges').doc(id).delete();
+  loadChallengesPage();
+  loadChallengesForOverview();
+}
+
+async function sendChallenge() {
+  const to  = $('chalTo').value.trim();
+  const msg = $('chalMsg').value.trim();
+  const type = $('chalType').value;
+  if (!to || !msg) { showToast('Fill in all fields', 'var(--r)'); return; }
+
+  // Find target
+  let snap = await db.collection('users').where('displayName','==',to).limit(1).get();
+  if (snap.empty) { showToast('Player not found', 'var(--r)'); return; }
+
+  const target = snap.docs[0];
+  await db.collection('challenges').add({
+    fromUid: currentUser.uid,
+    from: currentUser.displayName || currentUser.email,
+    toUid: target.id,
+    to: to,
+    msg: msg,
+    type: type,
+    read: false,
+    date: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  logActivity(`Challenged ${to}: "${msg}"`, 'y');
+  showToast(`⚡ Challenge sent to ${to}!`);
+  $('chalMsg').value = '';
+  $('chalTo').value = '';
+  loadChallengesPage();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MESSAGES
+// ══════════════════════════════════════════════════════════════
+async function loadMessagesPage() {
+  await loadFriendsData();
+  const contactsEl = $('msg-contacts');
+
+  if (!friendsList.length) {
+    contactsEl.innerHTML = '<div style="padding:1rem;font-family:\'Barlow Condensed\',sans-serif;font-size:.78rem;color:var(--mut);text-align:center;">Add friends to message them</div>';
+    return;
+  }
+
+  contactsEl.innerHTML = friendsList.map(f => {
+    const on = isOnline(f.lastSeen);
+    const isActive = activeConvoUid === f.id;
+    return `<div class="msg-contact ${isActive?'active':''}" onclick="openConvo('${f.id}','${(f.displayName||'').replace(/'/g,"\\'")}')">
+      <div class="mc-av">${avatarLetter(f.displayName)}</div>
+      ${on ? '<div class="mc-dot"></div>' : ''}
+      <div class="mc-info">
+        <div class="mc-name">${f.displayName || 'Unknown'}</div>
+        <div class="mc-preview">${on ? '● Online' : timeAgo(f.lastSeen)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (activeConvoUid) {
+    const f = friendsList.find(x => x.id === activeConvoUid);
+    if (f) openConvo(f.id, f.displayName || 'Unknown');
+  }
+}
+
+let msgListener = null;
+async function openConvo(uid, name) {
+  activeConvoUid = uid;
+  const mainEl = $('msg-main');
+  if (!mainEl) return;
+
+  const f = friendsList.find(x => x.id === uid) || {};
+  const on = isOnline(f.lastSeen);
+
+  mainEl.innerHTML = `
+    <div class="msg-main-head">
+      <div class="friend-avatar" style="width:30px;height:30px;font-size:.85rem;">
+        <span class="av-initial">${avatarLetter(name)}</span>
+        ${on ? '<div class="online-dot" style="width:8px;height:8px;bottom:0;right:0;"></div>' : ''}
+      </div>
+      <div>
+        <div class="msg-main-name">${name}</div>
+        <div class="msg-main-status ${on?'online':''}">${on ? '● Online' : timeAgo(f.lastSeen)}</div>
+      </div>
+    </div>
+    <div class="msg-body" id="msg-body-content"></div>
+    <div class="msg-footer">
+      <input class="msg-input" id="msg-type-input" placeholder="Message ${name}..." onkeydown="if(event.key==='Enter')sendMsg('${uid}','${name.replace(/'/g,"\\'")}')" />
+      <button class="btn btn-g" onclick="sendMsg('${uid}','${name.replace(/'/g,"\\'")}')">Send</button>
+    </div>
+  `;
+
+  // Real-time listener
+  if (msgListener) msgListener();
+  const convoId = [currentUser.uid, uid].sort().join('_');
+  msgListener = db.collection('messages').doc(convoId).collection('msgs')
+    .orderBy('date', 'asc').limit(50)
+    .onSnapshot(snap => {
+      const bodyEl = $('msg-body-content');
+      if (!bodyEl) return;
+      if (!snap.size) {
+        bodyEl.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:.78rem;color:var(--mut);letter-spacing:2px;text-transform:uppercase;">No messages yet — say something</div>';
+        return;
+      }
+      bodyEl.innerHTML = snap.docs.map(d => {
+        const m = d.data();
+        const mine = m.fromUid === currentUser.uid;
+        const t = m.date?.toDate ? m.date.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+        return `<div class="msg-bubble ${mine?'mine':'theirs'}">
+          <div class="bubble-text">${m.text}</div>
+          <div class="bubble-time">${t}</div>
+        </div>`;
+      }).join('');
+      bodyEl.scrollTop = bodyEl.scrollHeight;
+    });
+
+  // Update contacts view
+  document.querySelectorAll('.msg-contact').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('onclick')?.includes(uid));
+  });
+}
+
+async function sendMsg(toUid, toName) {
+  const input = $('msg-type-input');
+  const text = input?.value.trim();
+  if (!text) return;
+
+  const convoId = [currentUser.uid, toUid].sort().join('_');
+  await db.collection('messages').doc(convoId).collection('msgs').add({
+    fromUid: currentUser.uid,
+    from: currentUser.displayName || 'Me',
+    toUid: toUid,
+    text: text,
+    date: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  if (input) input.value = '';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CONTACT
+// ══════════════════════════════════════════════════════════════
+async function submitContact() {
+  const subject  = $('ctSubject').value.trim();
+  const body     = $('ctBody').value.trim();
+  const category = $('ctCategory').value;
+  const priority = $('ctPriority').value;
+  if (!subject || !body) { showToast('Fill in subject and message', 'var(--r)'); return; }
+
+  await db.collection('reports').add({
+    uid: currentUser.uid,
+    from: currentUser.displayName || currentUser.email,
+    email: currentUser.email,
+    subject, body, category, priority,
+    status: 'open',
+    date: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  logActivity(`Submitted ${category} report: "${subject}"`, 'b');
+  showToast('✓ Report submitted!');
+  $('ctSubject').value = '';
+  $('ctBody').value = '';
+  loadMyReports();
+}
+
+async function loadMyReports() {
+  try {
+    const snap = await db.collection('reports').where('uid','==',currentUser.uid).orderBy('date','desc').limit(10).get();
+    const el = $('my-reports');
+    if (!snap.size) { el.innerHTML = '<div class="empty">No reports yet</div>'; return; }
+    const colors = { bug:'r', suggestion:'b', account:'y', other:'g' };
+    const pColors = { low:'g', medium:'y', high:'r' };
+    el.innerHTML = snap.docs.map(d => {
+      const r = d.data();
+      const dt = r.date?.toDate?.().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) || '—';
+      return `<div style="padding:.75rem 0;border-bottom:1px solid rgba(0,255,70,.05);">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;flex-wrap:wrap;">
+          <span class="tag ${colors[r.category]||'g'}">${r.category}</span>
+          <span class="tag ${pColors[r.priority]||'g'}">${r.priority}</span>
+          <strong style="font-family:'Barlow Condensed',sans-serif;font-size:.9rem;color:#fff;">${r.subject}</strong>
+          <span style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:var(--mut);">${dt}</span>
+          <span class="tag ${r.status==='open'?'y':'g'}">${r.status||'open'}</span>
+        </div>
+        <div style="font-size:.8rem;color:var(--mut2);line-height:1.5;">${r.body}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════════════════════════
+let admAllPlayers = [];
+
+async function loadAdminPage() {
+  await admLoadPlayers();
+  await loadAdminStats();
+  await loadAdminReports();
+  loadSettings();
+  renderAdmLog();
+  updatePatchPreview();
+}
+
+async function loadAdminStats() {
+  try {
+    const snap = await db.collection('users').get();
+    const players = snap.docs.map(d => ({id:d.id,...d.data()}));
+    if ($('adm-total-players')) $('adm-total-players').textContent = players.length;
+    const totalGames = players.reduce((s,p) => s+(p.gamesPlayed||0),0);
+    if ($('adm-total-games')) $('adm-total-games').textContent = totalGames.toLocaleString();
+    const topScore = players.length ? Math.max(...players.map(p=>p.bestScore||0)) : 0;
+    if ($('adm-top-score')) $('adm-top-score').textContent = topScore > 0 ? topScore.toLocaleString() : '—';
+  } catch(e) {}
+  try {
+    const rSnap = await db.collection('reports').where('status','==','open').get();
+    if ($('adm-reports')) $('adm-reports').textContent = rSnap.size;
+    if ($('adm-reports-badge')) $('adm-reports-badge').textContent = rSnap.size;
+  } catch(e) {}
+}
+
+async function admLoadPlayers() {
+  try {
+    const snap = await db.collection('users').get();
+    admAllPlayers = snap.docs.map(d => ({id:d.id,...d.data()}));
+    admRenderPlayers(admAllPlayers);
+  } catch(e) {}
+}
+
+function admRenderPlayers(players) {
+  const el = $('adm-players-table');
+  if (!el) return;
+  if (!players.length) { el.innerHTML = '<tr><td colspan="4" class="empty">No players</td></tr>'; return; }
+  el.innerHTML = players.map(p => `<tr>
+    <td>
+      <strong>${p.displayName||'Anon'}</strong><br>
+      <span style="font-size:.72rem;color:var(--mut)">${p.email||'—'}</span>
+    </td>
+    <td>${(p.gamesPlayed||0).toLocaleString()}</td>
+    <td style="color:var(--g);font-family:'Share Tech Mono',monospace;font-size:.8rem;">${(p.bestScore||0).toLocaleString()}</td>
+    <td style="display:flex;gap:.35rem;flex-wrap:wrap;">
+      <button class="btn btn-r btn-sm" onclick="admResetScore('${p.id}','${(p.displayName||'player').replace(/'/g,"\\'")}')">Reset Score</button>
+      <button class="btn btn-y btn-sm" onclick="admBanPlayer('${p.id}','${(p.displayName||'player').replace(/'/g,"\\'")}')">Ban</button>
+    </td>
+  </tr>`).join('');
+}
+
+function admSearchPlayers() {
+  const q = ($('admPlayerSearch')?.value||'').toLowerCase();
+  admRenderPlayers(q ? admAllPlayers.filter(p => (p.displayName||'').toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q)) : admAllPlayers);
+}
+
+async function admResetScore(uid, name) {
+  if (!confirm(`Reset ${name}'s score?`)) return;
+  await db.collection('users').doc(uid).set({bestScore:0,gamesPlayed:0},{merge:true});
+  admLogAction(`Reset score for: ${name}`, 'r');
+  showToast(`Reset ${name}'s score`, 'var(--r)');
+  admLoadPlayers();
+}
+
+async function admBanPlayer(uid, name) {
+  if (!confirm(`Ban ${name}? This will set their account as banned.`)) return;
+  await db.collection('users').doc(uid).set({banned:true,bannedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+  admLogAction(`Banned player: ${name}`, 'r');
+  showToast(`Banned ${name}`, 'var(--r)');
+  admLoadPlayers();
+}
+
+async function loadAdminReports() {
+  try {
+    const snap = await db.collection('reports').orderBy('date','desc').limit(20).get();
+    const el = $('adm-reports-list');
+    if (!snap.size) { el.innerHTML = '<div class="empty">No reports</div>'; return; }
+    const colors = {bug:'r',suggestion:'b',account:'y',other:'g'};
+    const pColors = {low:'g',medium:'y',high:'r'};
+    el.innerHTML = snap.docs.map(d => {
+      const r = d.data();
+      const dt = r.date?.toDate?.().toLocaleDateString('en-GB',{day:'numeric',month:'short'}) || '—';
+      return `<div style="padding:.85rem 0;border-bottom:1px solid rgba(0,255,70,.05);">
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.3rem;">
+          <span class="tag ${colors[r.category]||'g'}">${r.category}</span>
+          <span class="tag ${pColors[r.priority]||'g'}">${r.priority}</span>
+          <strong style="font-family:'Barlow Condensed',sans-serif;color:#fff;">${r.subject}</strong>
+          <span style="color:var(--mut);font-size:.7rem;font-family:'Barlow Condensed',sans-serif;">— ${r.from||'Unknown'} — ${dt}</span>
+          <div style="margin-left:auto;display:flex;gap:.4rem;">
+            <button class="btn btn-g btn-sm" onclick="resolveReport('${d.id}')">Resolve</button>
+            <button class="btn btn-r btn-sm" onclick="deleteReport('${d.id}')">Delete</button>
+          </div>
+        </div>
+        <div style="font-size:.8rem;color:var(--mut2);line-height:1.5;">${r.body}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+async function resolveReport(id) {
+  await db.collection('reports').doc(id).update({status:'resolved'});
+  admLogAction('Resolved report #'+id.slice(0,6), 'g');
+  showToast('Report resolved');
+  loadAdminReports();
+  loadAdminStats();
+}
+
+async function deleteReport(id) {
+  if (!confirm('Delete this report?')) return;
+  await db.collection('reports').doc(id).delete();
+  admLogAction('Deleted report', 'r');
+  loadAdminReports();
+  loadAdminStats();
+}
+
+async function broadcastAlert() {
+  const msg = $('broadcastMsg').value.trim();
+  if (!msg) return;
+  await db.collection('announcements').add({
+    msg, type:'warning', active:true,
+    date: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  admLogAction(`Broadcast: "${msg}"`, 'y');
+  showToast('📢 Broadcast sent!');
+  $('broadcastMsg').value = '';
+}
+
+// Patch Notes
+document.addEventListener('input', e => {
+  if (['pnTitle','pnBody','pnType','pnVersion'].includes(e.target?.id)) updatePatchPreview();
+});
+function updatePatchPreview() {
+  const type  = $('pnType')?.value || 'update';
+  const title = $('pnTitle')?.value || 'Title Preview';
+  const body  = $('pnBody')?.value  || 'Content will appear here...';
+  const ver   = $('pnVersion')?.value || '';
+  const colors = {update:'g',hotfix:'r',new:'g',balance:'y'};
+  const tag = $('pnPreviewTag');
+  if (tag) {
+    tag.textContent = (ver ? ver+' · ':'')+type.toUpperCase();
+    tag.className = `tag ${colors[type]||'g'}`;
+  }
+  if ($('pnPreviewTitle')) $('pnPreviewTitle').textContent = title;
+  if ($('pnPreviewBody'))  $('pnPreviewBody').textContent  = body;
+  if ($('pnPreviewDate'))  $('pnPreviewDate').textContent  = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
+async function postPatchNote() {
+  const version = $('pnVersion').value.trim();
+  const title   = $('pnTitle').value.trim();
+  const body    = $('pnBody').value.trim();
+  const type    = $('pnType').value;
+  if (!title || !body) { showToast('Title and content required','var(--r)'); return; }
+  await db.collection('patchNotes').add({
+    version,title,body,type,
+    date: firebase.firestore.FieldValue.serverTimestamp(),
+    postedBy: currentUser.email
+  });
+  admLogAction(`Posted patch note: "${title}" (${type})`, 'g');
+  showToast('✓ Patch note posted!');
+  clearPatchForm();
+}
+function clearPatchForm() {
+  ['pnVersion','pnTitle','pnBody'].forEach(id => { const el=$(id); if(el) el.value=''; });
+  if($('pnType')) $('pnType').value='update';
+  updatePatchPreview();
+}
+
+// Settings
+async function loadSettings() {
+  try {
+    const snap = await db.collection('config').doc('global').get();
+    const cfg = snap.exists ? snap.data() : {};
+    if ($('seasonName') && cfg.seasonName) $('seasonName').value = cfg.seasonName;
+    if ($('seasonEnd')  && cfg.seasonEnd)  $('seasonEnd').value  = cfg.seasonEnd;
+    const maintenance = cfg.maintenance || false;
+    if ($('maintenanceStatus')) $('maintenanceStatus').textContent = `Currently: ${maintenance ? 'ON ⚠️':'OFF'}`;
+    if ($('maintenanceBtn'))    $('maintenanceBtn').textContent    = maintenance ? 'Disable Maintenance Mode':'Enable Maintenance Mode';
+  } catch(e) {}
+}
+async function toggleMaintenance() {
+  const snap = await db.collection('config').doc('global').get();
+  const current = snap.exists ? (snap.data().maintenance || false) : false;
+  await db.collection('config').doc('global').set({maintenance:!current},{merge:true});
+  admLogAction(`Maintenance ${!current?'ENABLED':'DISABLED'}`, !current?'r':'g');
+  showToast(`Maintenance ${!current?'ON':'OFF'}`);
+  loadSettings();
+}
+async function saveSettings() {
+  const seasonName = $('seasonName')?.value;
+  const seasonEnd  = $('seasonEnd')?.value;
+  await db.collection('config').doc('global').set({seasonName,seasonEnd},{merge:true});
+  if (seasonEnd) seasonEndDate = new Date(seasonEnd+'T00:00:00Z').getTime();
+  admLogAction(`Updated season settings: "${seasonName}"`, 'y');
+  showToast('✓ Settings saved');
+}
+
+// Admin log
+let admLog = JSON.parse(localStorage.getItem('vr_adm_log')||'[]');
+function admLogAction(text, type='g') {
+  admLog.unshift({text,type,time:new Date().toISOString()});
+  if (admLog.length > 50) admLog = admLog.slice(0,50);
+  localStorage.setItem('vr_adm_log', JSON.stringify(admLog));
+  renderAdmLog();
+}
+function renderAdmLog() {
+  const el = $('adm-log');
+  if (!el) return;
+  if (!admLog.length) { el.innerHTML='<div class="empty">No admin actions yet</div>'; return; }
+  el.innerHTML = admLog.slice(0,20).map(l => {
+    const d = new Date(l.time);
+    const t = d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return `<div class="action-log-row"><div class="log-dot ${l.type}"></div><div class="log-text">${l.text}</div><div class="log-time">${t}</div></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════════════════
+function logout() {
+  if (msgListener) msgListener();
+  auth.signOut().then(() => location.href = 'index.html');
+}
+
+auth.onAuthStateChanged(async user => {
+  const loadingEl = $('loading');
+  setTimeout(() => loadingEl.classList.add('hide'), 800);
+
+  if (!user) {
+    $('accessDenied').classList.add('show');
+    return;
+  }
+
+  currentUser = user;
+  isAdmin = ADMIN_UIDS.includes(user.uid) || user.email === ADMIN_EMAIL;
+
+  // Update last seen
+  try {
+    await db.collection('users').doc(user.uid).set({
+      lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+      email: user.email,
+      displayName: user.displayName || user.email.split('@')[0]
+    }, {merge:true});
+  } catch(e) {}
+
+  // Show UI
+  $('appBody').classList.add('show');
+  $('navAvatar').textContent = avatarLetter(user.displayName || user.email);
+  $('navUsername').textContent = user.displayName || user.email.split('@')[0];
+
+  if (isAdmin) {
+    $('navRole').textContent = '👑 Admin';
+    $('navRole').classList.add('admin');
+    $('tab-admin').style.display = 'flex';
+  } else {
+    $('navRole').textContent = 'Player';
+  }
+
+  loadOverview();
+});
+</script>
+</body>
+</html>

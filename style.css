@@ -1,0 +1,153 @@
+/* Global */
+body {
+    margin: 0;
+    background: #000; /* Black void background */
+    font-family: 'Orbitron', sans-serif;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* Navbar */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(0,0,0,0.8);
+}
+
+nav a {
+    text-decoration: none;
+    color: #00ff7f; /* Green neon */
+    font-weight: bold;
+    margin-left: 20px;
+    position: relative;
+    transition: 0.3s;
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    left: 0;
+    bottom: -4px;
+    background: #00ff7f;
+    transition: 0.3s;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* Hero / Home */
+.hero {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 70px;
+    color: #00ff7f;
+    text-shadow: 0 0 20px #00ff7f, 0 0 40px #00ff7f;
+}
+
+.hero p {
+    font-size: 24px;
+    color: #aaa;
+}
+
+.playbtn {
+    margin-top: 30px;
+    padding: 20px 50px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    background: #00ff7f;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    text-shadow: 0 0 10px #fff;
+    box-shadow: 0 0 20px #00ff7f, 0 0 40px #00ff7f;
+    transition: 0.3s;
+}
+
+.playbtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px #00ff7f, 0 0 60px #00ff7f, 0 0 90px #00ff7f;
+}
+
+/* Login Form */
+.form {
+    max-width: 400px;
+    margin: 100px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input {
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    font-size: 18px;
+    background: #111;
+    color: #00ff7f;
+}
+
+button {
+    padding: 15px;
+    font-size: 18px;
+    background: #00ff7f;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 20px #00ff7f;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px #00ff7f, 0 0 60px #00ff7f;
+}
+
+/* Play Page / Game iframe */
+iframe {
+    width: 100%;
+    height: 100vh;
+    border: none;
+}
+
+/* About Page */
+.about {
+    max-width: 800px;
+    margin: 100px auto;
+    text-align: center;
+    line-height: 1.8;
+    color: #aaa;
+    font-size: 20px;
+}
+/* Back button styling */
+.backbtn {
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+    background: #00ff7f; /* green neon */
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 20px #00ff7f, 0 0 40px #00ff7f;
+    transition: 0.3s;
+}
+
+.backbtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px #00ff7f, 0 0 60px #00ff7f;
+}
